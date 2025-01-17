@@ -1,3 +1,18 @@
+ln -s /afs/zengwang/projects/task_define_service/data/OVO-Bench /afs/zengwang/projects/task_define_service/OVO-Bench/data
+
+cd  /afs/zengwang/projects/task_define_service/OVO-Bench
+
+
+python inference.py \
+    --mode offline \
+    --task EPM ASI HLD STU OJR ATR ACR OCR FPD REC SSR CRR \
+    --model QWen2VL_7B \
+    --model_path /afs/zengwang/ckpt/Stream-Qwen2-VL-7B-Instruct
+
+python score.py --model QWen2VL_7B --mode offline
+
+
+
 huggingface-cli download \
 --repo-type dataset \
 --resume-download JoeLeelyf/OVO-Bench \
