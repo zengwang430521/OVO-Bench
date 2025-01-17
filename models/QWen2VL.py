@@ -9,7 +9,7 @@ class EvalQWen2VL(OVOBenchOffline):
         super().__init__(args)
 
         self.args = args
-        self._model_init_()
+        self._model_init()
 
     def _model_init(self):
         model_path = self.args.model_path
