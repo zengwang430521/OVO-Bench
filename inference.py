@@ -9,7 +9,7 @@ from models import *
 import os
 
 parser = argparse.ArgumentParser(description='Run OVBench')
-parser.add_argument("--anno_path", type=str, default="data/ovbench.json", help="Path to the annotations")
+parser.add_argument("--anno_path", type=str, default="data/ovo_bench.json", help="Path to the annotations")
 parser.add_argument("--video_dir", type=str, default="", help="Root directory of source videos")
 parser.add_argument("--result_dir", type=str, default="results", help="Root directory of results")
 parser.add_argument("--mode", type=str, required=True, choices=["online", "offline"], help="Online of Offline model for testing")
