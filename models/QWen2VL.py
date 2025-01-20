@@ -52,7 +52,6 @@ class EvalQWen2VL(OVOBenchOffline):
             tokenize=False,
             add_generation_prompt=True,
         )
-        import pdb; pdb.set_trace()
         image_inputs, video_inputs = process_vision_info(messages)
 
         mm_data = {}
