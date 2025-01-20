@@ -6,8 +6,9 @@ cd  /afs/zengwang/projects/task_define_service/OVO-Bench
 python inference.py \
     --mode offline \
     --task EPM ASI HLD STU OJR ATR ACR OCR FPD REC SSR CRR \
-    --model QWen2VL_7B \
+    --model QWen2VL_7B_V2 \
     --model_path /afs/zengwang/ckpt/Qwen2-VL-7B-Instruct
+
 
 python score.py --model QWen2VL_7B --mode offline
 
