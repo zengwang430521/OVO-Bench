@@ -30,6 +30,7 @@ class EvalQWen2VL(OVOBenchOffline):
         self.processor = AutoProcessor.from_pretrained(model_path)
 
     def inference(self, video_file_name, prompt):
+        import pdb; pdb.set_trace()
         messages = [
             {
                 "role": "user",
