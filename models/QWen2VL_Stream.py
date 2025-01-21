@@ -232,9 +232,9 @@ class EvalQWen2VLStream(OVOBenchOffline):
             messages = text_historys + [video_message]
             text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=False)
             if len(frames) % 2 == 0:
-                frames_input = torch.stack(frames, dim=0)
+                frames_input = torch.cat(frames, dim=0)
             else:
-                frames_input = torch.stack(frames + [frames[-1]], dim=0)
+                frames_input = torch.cat(frames + [frames[-1]], dim=0)
             inputs = self.processor(text=[text], images=None, videos=[frames_input], padding=True, return_tensors="pt")
             inputs = inputs.to("cuda")
             with torch.no_grad():
