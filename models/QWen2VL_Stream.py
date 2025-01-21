@@ -109,7 +109,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
         self.args = args
         self._model_init()
         self.fps = 2
-        self.max_frame_num = 2
+        self.max_frame_num = 64
 
     def _model_init(self):
         model_path = self.args.model_path
@@ -151,7 +151,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
         # frames in history when query
         sample_times = []
         cur_time = start_time
-        while cur_time <= query_time:
+        while cur_time < query_time:
             sample_times.append(cur_time)
             cur_time += time_step
 
@@ -160,7 +160,6 @@ class EvalQWen2VLStream(OVOBenchOffline):
         sample_idxs = [round(t * video_fps) for t in sample_times]
         frames = vr.get_batch(sample_idxs).asnumpy()
         frames = torch.tensor(frames).permute(0, 3, 1, 2) # Convert to TCHW format
-
 
         # resize params
         nframes, _, height, width = frames.shape
@@ -190,6 +189,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             antialias=True,
         ).float()
 
+        frames = torch.split(frames, nframes, dim=0)    # 分成list便于处理
 
         video_token_id = 151656
         system_prompt = "You are a helpful assistant."
@@ -202,7 +202,11 @@ class EvalQWen2VLStream(OVOBenchOffline):
         def need_response():
             messages = text_historys + [video_message]
             text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=False)
-            inputs = self.processor(text=[text], images=None, videos=[frames], padding=True, return_tensors="pt")
+            if len(frames) % 2 == 0:
+                frames_input = torch.stack(frames, dim=0)
+            else:
+                frames_input = torch.stack(frames + [frames[-1]], dim=0)
+            inputs = self.processor(text=[text], images=None, videos=[frames_input], padding=True, return_tensors="pt")
             inputs = inputs.to("cuda")
             with torch.no_grad():
                 output = self.model.forward(**inputs)
@@ -215,6 +219,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
         def get_response():
             messages = text_historys + [video_message]
             text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+            frames_input = frames + [frames[-1]] if len(frames) % 2 != 0 else frames
             inputs = self.processor(text=[text], images=None, videos=[frames], padding=True, return_tensors="pt")
             inputs = inputs.to("cuda")
             generated_ids = self.model.generate(**inputs, max_new_tokens=128)
