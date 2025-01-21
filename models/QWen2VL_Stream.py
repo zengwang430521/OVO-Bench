@@ -151,7 +151,6 @@ class EvalQWen2VLStream(OVOBenchOffline):
             "fps": self.fps,
             "max_pixels": 256*256,
         }
-
         # 视频对象
         vr = decord.VideoReader(video_file_name)
         total_frames, video_fps = len(vr), vr.get_avg_fps()
@@ -280,6 +279,9 @@ class EvalQWen2VLStream(OVOBenchOffline):
                     response = get_response()
                     all_responses.append((cur_time, response))
                     text_historys.append({"role": "assistant", "content": response})
+                else:
+                    all_responses.append((cur_time, None))
+
                 check_time += check_time_step
             cur_time += frame_time_step
 
@@ -307,11 +309,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
                     force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime, end_time=realtime+3, only_one_response=True)
                 except Exception as e:
                     print(f"Error during inference: {e}")
-                    response = None
-                finally:
-                    pass
-                    # if chunk_video_path:
-                    #     os.remove(chunk_video_path)
+                    force_response, all_responses = None, None
 
                 result = {
                     "id": id,
@@ -344,11 +342,8 @@ class EvalQWen2VLStream(OVOBenchOffline):
                     force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime, end_time=realtime+3, only_one_response=True)
                 except Exception as e:
                     print(f"Error during inference: {e}")
-                    response = None
-                finally:
-                    # if chunk_video_path:
-                    #     os.remove(chunk_video_path)
-                    pass
+                    force_response, all_responses = None, None
+
 
                 result = {
                     "id": id,
@@ -380,9 +375,11 @@ class EvalQWen2VLStream(OVOBenchOffline):
                     query_time = _anno_["start_time"][0]
 
                 prompt = self.build_prompt(task=task, question=None, options=None, _anno_=_anno_, index=None)
+                try:
+                    force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=query_time, end_time=end_time, only_one_response=False)
+                except:
+                    force_response, all_responses = None, None
 
-                force_response, all_responses = self.inference(
-                    video, prompt, start_time=0, query_time=query_time, end_time=end_time, only_one_response=False)
                 _anno_["force_response"] = force_response
                 _anno_["all_responses"] = all_responses
                 forward_results.append(_anno_)
