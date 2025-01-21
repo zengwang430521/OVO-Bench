@@ -294,7 +294,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
         return force_response, all_responses
 
     def eval(self, anno, task_list, mode="offline"):
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
         # Inference
         if len(anno["backward"]) > 0:
