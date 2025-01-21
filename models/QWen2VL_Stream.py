@@ -144,7 +144,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             end_time,
             check_time_step=1.0,
             only_one_response=False):
-        # import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         ele = {
             "type": "video",
             "video": video_file_name,
