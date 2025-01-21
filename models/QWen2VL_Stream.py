@@ -147,6 +147,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             "type": "video",
             "video": video_file_name,
             "fps": self.fps,
+            "max_pixels": 256*256,
         }
 
         # 视频对象
