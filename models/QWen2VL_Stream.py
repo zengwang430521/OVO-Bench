@@ -199,7 +199,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             interpolation=InterpolationMode.BICUBIC,
             antialias=True,
         ).float()
-
+        import pdb; pdb.set_trace()
         frames = list(torch.split(frames, 1, dim=0))    # 分成list便于处理
 
         video_token_id = 151656
