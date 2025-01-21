@@ -144,7 +144,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             end_time,
             check_time_step=1.0,
             only_one_response=False):
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         ele = {
             "type": "video",
             "video": video_file_name,
@@ -156,6 +156,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
         vr = decord.VideoReader(video_file_name)
         total_frames, video_fps = len(vr), vr.get_avg_fps()
         frame_time_step = 1.0 / self.fps
+        end_time = min((total_frames-1) / video_fps, end_time)
 
         # frames in history when query
         sample_times = []
@@ -257,7 +258,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
         # stream 循环处理
         cur_time += frame_time_step
         check_time = query_time + check_time_step
-        while cur_time < end_time:
+        while cur_time <= end_time:
             if only_one_response and len(all_responses) > 0:
                 break
             new_sample_idx = round(cur_time * video_fps)
@@ -378,6 +379,8 @@ class EvalQWen2VLStream(OVOBenchOffline):
                 else:
                     query_time = _anno_["start_time"][0]
 
+                prompt = self.build_prompt(task=task, question=question, options=options, _anno_=None, index=None)
+
                 force_response, all_responses = self.inference(
                     video, prompt, start_time=0, query_time=query_time, end_time=end_time)
                 _anno_["force_response"] = force_response
@@ -402,3 +405,43 @@ class EvalQWen2VLStream(OVOBenchOffline):
                     "realtime": realtime_results,
                     "forward": forward_results
                 }, f, indent=4)
+
+
+    def build_prompt(self, task, question, options, _anno_, index):
+        if task in ["EPM", "ASI", "HLD", "STU", "OJR", "ATR", "ACR", "OCR", "FPD"]:
+            formatted_options = '; '.join(f'{chr(65 + i)}. {option}' for i, option in enumerate(options)) + ';'
+            prompt = f"""
+                Question: {question}
+                Options:
+                {formatted_options}
+                Respond only with the letter corresponding to your chosen option (e.g., A, B, C). 
+                Do not include any additional text or explanation in your response.
+            """
+        elif task == "REC":
+            activity = _anno_["activity"]
+            prompt = f""" 
+                In the video, the man/woman is {activity} repetitively. 
+                Your task is to count how many times he/she has completed the action of {activity}.
+                Remind me every time when he/she finishes one.
+                Provide your answer as a single number (e.g., 0, 1, 2, 3…) indicating the total count.
+                Do not include any additional text or explanation in your response.
+            """
+
+        elif task == "SSR":
+            tutorial = _anno_["tutorial"]
+            all_steps = _anno_["all_steps"]
+            formatted_steps = '; '.join(f'{chr(65 + i)}. {step}' for i, step in enumerate(all_steps)) + ';'
+            prompt = f"""
+                You're watching a tutorial video of {tutorial}. It contains the following steps:
+                {formatted_steps}
+                Your task is to tell me what step the video is at.
+                Remind me every time when he/she turns to a new step.
+                Respond only with the letter corresponding to current step (e.g., A, B, C). 
+                Do not include any additional text or explanation in your response.
+            """
+
+        elif task == "CRR":
+            question = _anno_["question"]
+            answer = _anno_["answer"]
+            prompt = f"""{question}"""
+        return prompt
