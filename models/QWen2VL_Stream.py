@@ -142,6 +142,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             query_time,
             start_time,
             end_time,
+            check_time_step=1.0,
             only_one_response=False):
         import pdb; pdb.set_trace()
         ele = {
@@ -154,14 +155,14 @@ class EvalQWen2VLStream(OVOBenchOffline):
         # 视频对象
         vr = decord.VideoReader(video_file_name)
         total_frames, video_fps = len(vr), vr.get_avg_fps()
-        time_step = 1.0 / self.fps
+        frame_time_step = 1.0 / self.fps
 
         # frames in history when query
         sample_times = []
         cur_time = start_time
         while cur_time < query_time:
             sample_times.append(cur_time)
-            cur_time += time_step
+            cur_time += frame_time_step
 
         if len(sample_times) > self.max_frame_num:
             sample_times = sample_times[-self.max_frame_num:]
@@ -252,13 +253,13 @@ class EvalQWen2VLStream(OVOBenchOffline):
             all_responses.append((cur_time, force_response))
             text_historys.append({"role": "assistant", "content": force_response})
 
-        cur_time += time_step
 
         # stream 循环处理
-        while cur_time <= end_time:
+        cur_time += frame_time_step
+        check_time = query_time + check_time_step
+        while cur_time < end_time:
             if only_one_response and len(all_responses) > 0:
                 break
-
             new_sample_idx = round(cur_time * video_fps)
             new_frame = vr.get_batch([new_sample_idx]).asnumpy()
             new_frame = torch.tensor(new_frame).permute(0, 3, 1, 2) # Convert to TCHW format
@@ -271,12 +272,15 @@ class EvalQWen2VLStream(OVOBenchOffline):
             frames.append(new_frame)
             if len(frames) > self.max_frame_num:
                 frames = frames[-self.max_frame_num:]
-            if need_response():
-                response = get_response()
-                all_responses.append((cur_time, response))
-                text_historys.append({"role": "assistant", "content": response})
 
-            cur_time += time_step
+            if cur_time >= check_time:
+                # 如果到了检查的节点，就检查
+                if need_response():
+                    response = get_response()
+                    all_responses.append((cur_time, response))
+                    text_historys.append({"role": "assistant", "content": response})
+                check_time += check_time_step
+            cur_time += frame_time_step
 
         return force_response, all_responses
 
