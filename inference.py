@@ -26,6 +26,8 @@ parser.add_argument("--gpt_api", type=str, required=False, default=None)
 parser.add_argument("--gemini_project", type=str, required=False, default=None)
 # For local running model init
 parser.add_argument("--model_path", type=str, required=False, default=None)
+parser.add_argument("--lora_path", type=str, required=False, default=None)
+
 args = parser.parse_args()
 
 print(f"Inference Model: {args.model}; Task: {args.task}")
