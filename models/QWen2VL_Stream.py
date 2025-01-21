@@ -137,7 +137,6 @@ class EvalQWen2VLStream(OVOBenchOffline):
             start_time,
             end_time):
 
-        import pdb; pdb.set_trace()
         ele = {
             "type": "video",
             "video": video_file_name,
@@ -258,6 +257,8 @@ class EvalQWen2VLStream(OVOBenchOffline):
         return response, all_responses
 
     def eval(self, anno, task_list, mode="offline"):
+        import pdb; pdb.set_trace()
+
         # Inference
         if len(anno["backward"]) > 0:
             backward_results = []
