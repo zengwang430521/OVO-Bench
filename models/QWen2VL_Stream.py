@@ -304,7 +304,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
                 try:
                     # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
                     # response = self.inference(chunk_video_path, prompt)
-                    force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime, end_time=realtime+3)
+                    force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime, end_time=realtime+3, only_one_response=True)
                 except Exception as e:
                     print(f"Error during inference: {e}")
                     response = None
@@ -341,7 +341,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
                     # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
                     # response = self.inference(chunk_video_path, prompt)
                     # response = self.inference(video, prompt, start_time=0, end_time=realtime)
-                    force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime, end_time=realtime+3)
+                    force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime, end_time=realtime+3, only_one_response=True)
                 except Exception as e:
                     print(f"Error during inference: {e}")
                     response = None
@@ -382,7 +382,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
                 prompt = self.build_prompt(task=task, question=None, options=None, _anno_=_anno_, index=None)
 
                 force_response, all_responses = self.inference(
-                    video, prompt, start_time=0, query_time=query_time, end_time=end_time)
+                    video, prompt, start_time=0, query_time=query_time, end_time=end_time, only_one_response=False)
                 _anno_["force_response"] = force_response
                 _anno_["all_responses"] = all_responses
                 forward_results.append(_anno_)
