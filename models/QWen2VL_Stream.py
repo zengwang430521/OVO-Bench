@@ -277,7 +277,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
 
             cur_time += time_step
 
-        return response, all_responses
+        return force_response, all_responses
 
     def eval(self, anno, task_list, mode="offline"):
         # import pdb; pdb.set_trace()
