@@ -196,7 +196,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             antialias=True,
         ).float()
 
-        frames = torch.split(frames, 1, dim=0)    # 分成list便于处理
+        frames = list(torch.split(frames, 1, dim=0))    # 分成list便于处理
 
         video_token_id = 151656
         system_prompt = "You are a helpful assistant."
@@ -243,7 +243,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             stream_logits = output.stream_logits
             last_logits = stream_logits[0, last_frame_token_index]
             result = last_logits[1] > last_logits[0]
-            return result
+            return result.item()
 
 
 
