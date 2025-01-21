@@ -132,8 +132,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             temperature=0.1,
             top_p=0.001,
             repetition_penalty=1.05,
-            max_tokens=256,
-            stop_token_ids=[],
+            max_new_tokens=256,
         )
 
     def inference(
@@ -275,7 +274,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
         return response, all_responses
 
     def eval(self, anno, task_list, mode="offline"):
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
         # Inference
         if len(anno["backward"]) > 0:
