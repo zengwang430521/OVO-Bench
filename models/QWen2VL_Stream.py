@@ -128,6 +128,13 @@ class EvalQWen2VLStream(OVOBenchOffline):
         model = model.eval()
         self.model = model
         self.processor = AutoProcessor.from_pretrained(model_path)
+        self.sampling_params = dict(
+            temperature=0.1,
+            top_p=0.001,
+            repetition_penalty=1.05,
+            max_tokens=256,
+            stop_token_ids=[],
+        )
 
     def inference(
             self,
@@ -189,7 +196,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             antialias=True,
         ).float()
 
-        frames = torch.split(frames, nframes, dim=0)    # 分成list便于处理
+        frames = torch.split(frames, 1, dim=0)    # 分成list便于处理
 
         video_token_id = 151656
         system_prompt = "You are a helpful assistant."
@@ -198,6 +205,28 @@ class EvalQWen2VLStream(OVOBenchOffline):
             {"role": "user", "content": prompt}
         ]
         video_message = {"role": "user", "content": [ele, {"type": "text", "text": ""}]}
+
+
+        def get_response():
+            messages = text_historys + [video_message]
+            text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+            if len(frames) % 2 == 0:
+                frames_input = torch.cat(frames, dim=0)
+            else:
+                frames_input = torch.cat(frames + [frames[-1]], dim=0)
+            inputs = self.processor(text=[text], images=None, videos=[frames_input], padding=True, return_tensors="pt")
+            inputs = inputs.to("cuda")
+            generated_ids = self.model.generate(**inputs, **self.sampling_params)
+            generated_ids_trimmed = [
+                out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+            ]
+            output_text = self.processor.batch_decode(
+                generated_ids_trimmed,
+                skip_special_tokens=True,
+                clean_up_tokenization_spaces=False
+            )
+            output_text = output_text[0]
+            return output_text
 
         def need_response():
             messages = text_historys + [video_message]
@@ -216,26 +245,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             result = last_logits[1] > last_logits[0]
             return result
 
-        def get_response():
-            messages = text_historys + [video_message]
-            text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-            if len(frames) % 2 == 0:
-                frames_input = torch.stack(frames, dim=0)
-            else:
-                frames_input = torch.stack(frames + [frames[-1]], dim=0)
-            inputs = self.processor(text=[text], images=None, videos=[frames_input], padding=True, return_tensors="pt")
-            inputs = inputs.to("cuda")
-            generated_ids = self.model.generate(**inputs, max_new_tokens=128)
-            generated_ids_trimmed = [
-                out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
-            ]
-            output_text = self.processor.batch_decode(
-                generated_ids_trimmed,
-                skip_special_tokens=True,
-                clean_up_tokenization_spaces=False
-            )
-            output_text = output_text[0]
-            return output_text
+
 
         # 先在 query time 强制回答一次
         force_response = get_response()
