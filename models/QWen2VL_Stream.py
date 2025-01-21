@@ -345,7 +345,11 @@ class EvalQWen2VLStream(OVOBenchOffline):
                 test_time = [t["realtime"] for t in _anno_['test_info']]
                 end_time = max(test_time) + 3
 
-                query_time = _anno_["start_time"][0]
+                if "ask_time" in _anno_.keys():
+                    query_time = _anno_["query_time"]
+                else:
+                    query_time = _anno_["start_time"][0]
+
                 force_response, all_responses = self.inference(
                     video, prompt, start_time=0, query_time=query_time, end_time=end_time)
                 _anno_["force_response"] = force_response
