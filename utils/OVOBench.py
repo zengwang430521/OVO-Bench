@@ -58,7 +58,7 @@ class OVOBenchOffline():
                     print(f"Error during inference: {e}")
                     response = None
                 finally:
-                    if chunk_video_path:
+                    if os.path.exists(chunk_video_path):
                         os.remove(chunk_video_path)
 
                 result = {
@@ -90,7 +90,7 @@ class OVOBenchOffline():
                     print(f"Error during inference: {e}")
                     response = None
                 finally:
-                    if chunk_video_path:
+                    if os.path.exists(chunk_video_path):
                         os.remove(chunk_video_path)
 
                 result = {
@@ -120,7 +120,7 @@ class OVOBenchOffline():
                         print(f"Error during inference: {e}")
                         response = None
                     finally:
-                        if chunk_video_path:
+                        if os.path.exists(chunk_video_path):
                             os.remove(chunk_video_path)
                     
                     _anno_["test_info"][i]["response"] = response
