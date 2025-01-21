@@ -33,34 +33,8 @@ args = parser.parse_args()
 
 print(f"Inference Model: {args.model}; Task: {args.task}")
 
-import pdb; pdb.set_trace()
+# import pdb; pdb.set_trace()
 
-if args.model == "GPT":
-    from models.GPT import EvalGPT
-    assert not args.gpt_api == None
-    model = EvalGPT(args)
-elif args.model == "Gemini":
-    from models.Gemini import EvalGemini
-    assert not args.gemini_project == None
-    model = EvalGemini(args)
-elif args.model == "InternVL2":
-    from models.InternVL2 import EvalInternVL2
-    assert os.path.exists(args.model_path)
-    model = EvalInternVL2(args)
-elif args.model == "QWen2VL_7B":
-    from models.QWen2VL import EvalQWen2VL
-    assert os.path.exists(args.model_path)
-    model = EvalQWen2VL(args)
-elif args.model == "QWen2VL_7B_V2":
-    from models.QWen2VL_v2 import EvalQWen2VL2
-    assert os.path.exists(args.model_path)
-    model = EvalQWen2VL2(args)
-elif args.model == "QWen2VLStream_7B":
-    from models.QWen2VL_Stream import EvalQWen2VLStream
-    assert os.path.exists(args.model_path)
-    model = EvalQWen2VLStream(args)
-else:
-    raise ValueError(f"Unsupported model: {args.model}. Please implement the model.")
 
 with open(args.anno_path, "r") as f:
     annotations = json.load(f)
@@ -93,5 +67,33 @@ anno = {
     "realtime": realtime_anno,
     "forward": forward_anno
 }
+
+
+if args.model == "GPT":
+    from models.GPT import EvalGPT
+    assert not args.gpt_api == None
+    model = EvalGPT(args)
+elif args.model == "Gemini":
+    from models.Gemini import EvalGemini
+    assert not args.gemini_project == None
+    model = EvalGemini(args)
+elif args.model == "InternVL2":
+    from models.InternVL2 import EvalInternVL2
+    assert os.path.exists(args.model_path)
+    model = EvalInternVL2(args)
+elif args.model == "QWen2VL_7B":
+    from models.QWen2VL import EvalQWen2VL
+    assert os.path.exists(args.model_path)
+    model = EvalQWen2VL(args)
+elif args.model == "QWen2VL_7B_V2":
+    from models.QWen2VL_v2 import EvalQWen2VL2
+    assert os.path.exists(args.model_path)
+    model = EvalQWen2VL2(args)
+elif args.model == "QWen2VLStream_7B":
+    from models.QWen2VL_Stream import EvalQWen2VLStream
+    assert os.path.exists(args.model_path)
+    model = EvalQWen2VLStream(args)
+else:
+    raise ValueError(f"Unsupported model: {args.model}. Please implement the model.")
 
 model.eval(anno, args.task, args.mode)
