@@ -136,7 +136,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             query_time,
             start_time,
             end_time):
-
+        import pdb; pdb.set_trace()
         ele = {
             "type": "video",
             "video": video_file_name,
@@ -346,7 +346,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
                 end_time = max(test_time) + 3
 
                 if "ask_time" in _anno_.keys():
-                    query_time = _anno_["query_time"]
+                    query_time = _anno_["ask_time"]
                 else:
                     query_time = _anno_["start_time"][0]
 
