@@ -141,7 +141,8 @@ class EvalQWen2VLStream(OVOBenchOffline):
             prompt,
             query_time,
             start_time,
-            end_time):
+            end_time,
+            only_one_response=False):
         import pdb; pdb.set_trace()
         ele = {
             "type": "video",
@@ -206,7 +207,6 @@ class EvalQWen2VLStream(OVOBenchOffline):
         ]
         video_message = {"role": "user", "content": [ele, {"type": "text", "text": ""}]}
 
-
         def get_response():
             messages = text_historys + [video_message]
             text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
@@ -245,8 +245,6 @@ class EvalQWen2VLStream(OVOBenchOffline):
             result = last_logits[1] > last_logits[0]
             return result.item()
 
-
-
         # 先在 query time 强制回答一次
         force_response = get_response()
         all_responses = []
@@ -257,6 +255,9 @@ class EvalQWen2VLStream(OVOBenchOffline):
 
         # stream 循环处理
         while cur_time <= end_time:
+            if only_one_response and len(all_responses) > 0:
+                break
+
             new_sample_idx = round(cur_time * video_fps)
             new_frame = vr.get_batch([new_sample_idx]).asnumpy()
             new_frame = torch.tensor(new_frame).permute(0, 3, 1, 2) # Convert to TCHW format
@@ -272,6 +273,10 @@ class EvalQWen2VLStream(OVOBenchOffline):
             if need_response():
                 response = get_response()
                 all_responses.append((cur_time, response))
+                text_historys.append({"role": "assistant", "content": response})
+
+            cur_time += time_step
+
         return response, all_responses
 
     def eval(self, anno, task_list, mode="offline"):
