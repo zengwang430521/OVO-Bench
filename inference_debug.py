@@ -82,7 +82,7 @@ for anno in annotations:
         if anno["task"] in forward_tasks:
             forward_anno.append(anno)
 
-        tasks.pop(anno["task"]) # 每种task只需要1个，便于debug
+        tasks.remove(anno["task"]) # 每种task只需要1个，便于debug
 
 anno = {
     # "backward": backward_anno[len(backward_anno)//2:],
