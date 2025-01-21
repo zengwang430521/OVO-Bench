@@ -379,7 +379,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
                 else:
                     query_time = _anno_["start_time"][0]
 
-                prompt = self.build_prompt(task=task, question=question, options=options, _anno_=None, index=None)
+                prompt = self.build_prompt(task=task, question=None, options=None, _anno_=_anno_, index=None)
 
                 force_response, all_responses = self.inference(
                     video, prompt, start_time=0, query_time=query_time, end_time=end_time)
@@ -405,7 +405,6 @@ class EvalQWen2VLStream(OVOBenchOffline):
                     "realtime": realtime_results,
                     "forward": forward_results
                 }, f, indent=4)
-
 
     def build_prompt(self, task, question, options, _anno_, index):
         if task in ["EPM", "ASI", "HLD", "STU", "OJR", "ATR", "ACR", "OCR", "FPD"]:
