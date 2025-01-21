@@ -76,7 +76,8 @@ for anno in annotations:
             forward_anno.append(anno)
 
 anno = {
-    "backward": backward_anno[len(backward_anno)//2:],
+    # "backward": backward_anno[len(backward_anno)//2:],
+    "backward": backward_anno,
     "realtime": realtime_anno,
     "forward": forward_anno
 }
