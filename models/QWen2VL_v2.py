@@ -176,6 +176,7 @@ class EvalQWen2VL2(OVOBenchOffline):
         if len(anno["backward"]) > 0:
             backward_results = []
             for _anno_ in tqdm(anno["backward"], desc="Backward Tasks"):
+                import pdb; pdb.set_trace()
                 id = _anno_["id"]
                 video = _anno_["video"]
                 task = _anno_["task"]
