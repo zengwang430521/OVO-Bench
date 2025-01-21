@@ -7,6 +7,13 @@ from tqdm import tqdm
 from qwen_vl_utils.vision_process import *
 import json
 import decord
+from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor
+from qwen_vl_utils import process_vision_info, fetch_video
+import torch
+from .qwen2_vl_monkey_patch import Qwen2VLStream
+from tqdm import tqdm
+import argparse
+from peft import LoraConfig, LoraModel, PeftModel, TaskType, get_peft_model
 
 
 def _read_video_decord_v2(
@@ -106,22 +113,21 @@ class EvalQWen2VLStream(OVOBenchOffline):
 
     def _model_init(self):
         model_path = self.args.model_path
-        self.llm = LLM(
-            model = model_path,
-            dtype=torch.bfloat16,
-            gpu_memory_utilization=0.7,
-        )
-        
-        self.sampling_params = SamplingParams(
-            temperature=0.1,
-            top_p=0.001,
-            repetition_penalty=1.05,
-            max_tokens=256,
-            stop_token_ids=[],
+        lora_path = self.args.lora_path
+
+        model = Qwen2VLStream.from_pretrained(
+            model_path,
+            torch_dtype=torch.bfloat16,
+            # attn_implementation="flash_attention_2",
+            device_map="auto",
         )
 
+        if lora_path is not None:
+            model = PeftModel.from_pretrained(model, lora_path)
+            model = model.merge_and_unload()
+        model = model.eval()
+        self.model = model
         self.processor = AutoProcessor.from_pretrained(model_path)
-
 
     def inference(
             self,
@@ -131,6 +137,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             start_time,
             end_time):
 
+        import pdb; pdb.set_trace()
         ele = {
             "type": "video",
             "video": video_file_name,
