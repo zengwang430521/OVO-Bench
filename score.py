@@ -29,7 +29,8 @@ for result_path in results_paths:
         results["realtime"] += result["realtime"]
         results["forward"] += result["forward"]
 
-if args.model in ["GPT", "Gemini", "InternVL2", "QWen2VL_7B"]:
+# if args.model in ["GPT", "Gemini", "InternVL2", "QWen2VL_7B", ]:
+if args.mode == "offline":
     score_model = OVOBenchOfflineScore(args, results)
 else:
     raise ValueError(f"Unsupported model: {args.model}. Please implement the model.")

@@ -10,7 +10,7 @@ python inference.py \
     --model_path /afs/zengwang/ckpt/Qwen2-VL-7B-Instruct
 
 
-python score.py --model QWen2VL_7B --mode offline
+python score.py --model QWen2VL_7B_V2 --mode offline
 
 
 
