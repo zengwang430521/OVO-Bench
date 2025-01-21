@@ -145,6 +145,8 @@ class EvalQWen2VLStream(OVOBenchOffline):
             check_time_step=1.0,
             only_one_response=False):
         # import pdb; pdb.set_trace()
+        print(f"(Time: {query_time}) User:{prompt}")
+
         ele = {
             "type": "video",
             "video": video_file_name,
@@ -252,7 +254,9 @@ class EvalQWen2VLStream(OVOBenchOffline):
         if need_response():
             all_responses.append((cur_time, force_response))
             text_historys.append({"role": "assistant", "content": force_response})
-
+            print(f"(Time: {cur_time}) Assistant:{force_response}")
+        else:
+            print(f"(Time: {cur_time})")
 
         # stream 循环处理
         cur_time += frame_time_step
@@ -279,8 +283,10 @@ class EvalQWen2VLStream(OVOBenchOffline):
                     response = get_response()
                     all_responses.append((cur_time, response))
                     text_historys.append({"role": "assistant", "content": response})
+                    print(f"(Time: {cur_time}) Assistant:{response}")
                 else:
                     all_responses.append((cur_time, None))
+                    print(f"(Time: {cur_time})")
 
                 check_time += check_time_step
             cur_time += frame_time_step
@@ -363,16 +369,15 @@ class EvalQWen2VLStream(OVOBenchOffline):
                 id = _anno_["id"]
                 video = _anno_["video"]
                 task = _anno_["task"]
-                test_info = _anno_["test_info"]
+                # test_info = _anno_["test_info"]
 
-                # end_time = _anno_["end_time"][-1]
                 test_time = [t["realtime"] for t in _anno_['test_info']]
                 end_time = max(test_time) + 3
 
                 if "ask_time" in _anno_.keys():
                     query_time = _anno_["ask_time"]
                 else:
-                    query_time = _anno_["start_time"][0]
+                    query_time = _anno_["start_times"][0]
 
                 prompt = self.build_prompt(task=task, question=None, options=None, _anno_=_anno_, index=None)
                 try:
