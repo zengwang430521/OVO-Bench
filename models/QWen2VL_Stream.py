@@ -341,7 +341,10 @@ class EvalQWen2VLStream(OVOBenchOffline):
                 task = _anno_["task"]
                 test_info = _anno_["test_info"]
 
-                end_time = _anno_["end_time"][-1]
+                # end_time = _anno_["end_time"][-1]
+                test_time = [t["realtime"] for t in _anno_['test_info']]
+                end_time = max(test_time) + 3
+
                 query_time = _anno_["start_time"][0]
                 force_response, all_responses = self.inference(
                     video, prompt, start_time=0, query_time=query_time, end_time=end_time)
