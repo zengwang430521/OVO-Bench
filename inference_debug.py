@@ -30,9 +30,10 @@ parser.add_argument("--lora_path", type=str, required=False, default=None)
 
 args = parser.parse_args()
 
-import pdb; pdb.set_trace()
 
 print(f"Inference Model: {args.model}; Task: {args.task}")
+
+import pdb; pdb.set_trace()
 
 if args.model == "GPT":
     from models.GPT import EvalGPT
