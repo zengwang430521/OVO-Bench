@@ -148,6 +148,10 @@ class OVOBenchOfflineScore():
                 "EPM", "ASI", "HLD", "Backward_Avg",
                 "REC", "SSR", "CRR", "Forward_Avg",
                 "Total_Avg"]
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
+
+        for k in keys:
+            print(f"{k}: {results_all.get(k, -1):.2f}")
+
         print(' '.join(keys))
-        print(' '.join([f"{results_all[k]:.2f}" for k in keys]))
+        print(' '.join([f"{results_all.get(k, -1):.2f}" for k in keys]))

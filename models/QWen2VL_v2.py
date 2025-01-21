@@ -46,7 +46,7 @@ def _read_video_decord_v2(
     return video
 
 
-def fetch_video_v2(ele: dict, image_factor: int = IMAGE_FACTOR) -> torch.Tensor | list[Image.Image]:
+def fetch_video_v2(ele: dict, image_factor: int = IMAGE_FACTOR):
     if isinstance(ele["video"], str):
         # video_reader_backend = get_video_reader_backend()
         # video = VIDEO_READER_BACKENDS[video_reader_backend](ele)

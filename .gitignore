@@ -1,4 +1,6 @@
 .idea
 __pycache__
-results/
-data/
+results
+data
+cmd_火山.sh
+cmd.sh
