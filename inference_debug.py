@@ -77,7 +77,7 @@ forward_tasks = ["REC", "SSR", "CRR"]
 
 tasks = set(args.task)
 for anno in annotations:
-    if anno["task"] in args.task:
+    if anno["task"] in tasks:
         if anno["task"] in backward_tasks:
             backward_anno.append(anno)
         if anno["task"] in realtime_tasks:
