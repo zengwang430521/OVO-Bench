@@ -250,6 +250,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
         all_responses = []
         if need_response():
             all_responses.append((cur_time, force_response))
+            text_historys.append({"role": "assistant", "content": force_response})
 
         cur_time += time_step
 
