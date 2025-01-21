@@ -95,7 +95,7 @@ class OVOBenchOfflineScore():
 
             # print(f"Backward Avg.: {100 * correct_backward / total_backward:.2f}\n")
             print(f"Backward Avg.: {100 * sum(avg_scores['backward'])/len(avg_scores['backward']):.2f}\n")
-            results_all["Backward Avg"] = 100 * sum(avg_scores['backward'])/len(avg_scores['backward'])
+            results_all["Backward_Avg"] = 100 * sum(avg_scores['backward'])/len(avg_scores['backward'])
         else:
             # correct_backward = 0
             # total_backward = 0
@@ -115,7 +115,7 @@ class OVOBenchOfflineScore():
 
             # print(f"Realtime Avg.: {100 * correct_realtime / total_realtime:.2f}\n")
             print(f"Realtime Avg.: {100 * sum(avg_scores['realtime'])/len(avg_scores['realtime']):.2f}\n")
-            results_all["Realtime Avg"] = 100 * sum(avg_scores['realtime'])/len(avg_scores['realtime'])
+            results_all["Realtime_Avg"] = 100 * sum(avg_scores['realtime'])/len(avg_scores['realtime'])
 
         else:
             # correct_realtime = 0
@@ -135,17 +135,19 @@ class OVOBenchOfflineScore():
 
             # print(f"Forward Avg.: {100 * correct_forward / total_forward:.2f}\n")
             print(f"Forward Avg.: {100 * sum(avg_scores['forward'])/len(avg_scores['forward']):.2f}\n")
-            results_all["Forward Avg"] = 100 * sum(avg_scores['forward'])/len(avg_scores['forward'])
+            results_all["Forward_Avg"] = 100 * sum(avg_scores['forward'])/len(avg_scores['forward'])
         else:
             # correct_forward = 0
             # total_forward = 0
             pass
 
         print(f"Total Avg.: {100 * (sum(avg_scores['backward']) + sum(avg_scores['realtime']) + sum(avg_scores['forward'])) / (len(avg_scores['backward']) + len(avg_scores['realtime']) + len(avg_scores['forward'])):.2f}")
-        results_all['Total Avg'] = 100 * (sum(avg_scores['backward']) + sum(avg_scores['realtime']) + sum(avg_scores['forward'])) / (len(avg_scores['backward']) + len(avg_scores['realtime']) + len(avg_scores['forward']))
+        results_all['Total_Avg'] = 100 * (sum(avg_scores['backward']) + sum(avg_scores['realtime']) + sum(avg_scores['forward'])) / (len(avg_scores['backward']) + len(avg_scores['realtime']) + len(avg_scores['forward']))
 
-        keys = ["OCR","ACR","ATR","STU","FPD","OJR","Realtime Avg","EPM","ASI","HLD","Backward Avg","REC","SSR","CRR","Forward Avg","Total Avg"]
-        s = ' '.join(keys)
-        print(s)
-        s = ' '.join([f"{results_all[k]:.2f}" for k in keys])
-        print(s)
+        keys = ["OCR", "ACR", "ATR", "STU", "FPD", "OJR", "Realtime_Avg",
+                "EPM", "ASI", "HLD", "Backward_Avg",
+                "REC", "SSR", "CRR", "Forward_Avg",
+                "Total_Avg"]
+        import pdb; pdb.set_trace()
+        print(' '.join(keys))
+        print(' '.join([f"{results_all[k]:.2f}" for k in keys]))
