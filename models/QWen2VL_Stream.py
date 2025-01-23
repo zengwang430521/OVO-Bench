@@ -58,7 +58,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             end_time,
             check_time_step=1.0,
             only_one_response=False):
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         print(f"(Time: {query_time}) User:{prompt}")
 
         ele = {
