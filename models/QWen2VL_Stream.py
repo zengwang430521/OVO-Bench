@@ -199,7 +199,9 @@ class EvalQWen2VLStream(OVOBenchOffline):
                     text_historys.append({"role": "assistant", "content": response})
                     print(f"(Time: {cur_time}) Assistant:{response}")
                 else:
-                    all_responses.append((cur_time, None))
+                    if not only_one_response:
+                        # only_one_response 模式下，加入None会让推理提前停止
+                        all_responses.append((cur_time, None))
                     print(f"(Time: {cur_time})")
 
                 check_time += check_time_step
