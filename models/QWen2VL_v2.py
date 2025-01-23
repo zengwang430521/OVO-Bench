@@ -50,7 +50,7 @@ def fetch_video_v2(ele: dict, image_factor: int = IMAGE_FACTOR):
     if isinstance(ele["video"], str):
         # video_reader_backend = get_video_reader_backend()
         # video = VIDEO_READER_BACKENDS[video_reader_backend](ele)
-        # import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         video = _read_video_decord_v2(ele)
         nframes, _, height, width = video.shape
 

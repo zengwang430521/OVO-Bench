@@ -12,6 +12,7 @@ parser = argparse.ArgumentParser(description='Eval OVBench')
 parser.add_argument("--result_dir", type=str, default="results", help="Root directory of results")
 parser.add_argument("--model", type=str, required=True, help="Model to evaluate")
 parser.add_argument("--mode", type=str, required=True, choices=["online", "offline"], help="Online of Offline model for testing")
+parser.add_argument("--force_response", action="store_true")
 args = parser.parse_args()
 
 assert os.path.exists(os.path.join(args.result_dir, args.model))
@@ -32,6 +33,8 @@ for result_path in results_paths:
 # if args.model in ["GPT", "Gemini", "InternVL2", "QWen2VL_7B", ]:
 if args.mode == "offline":
     score_model = OVOBenchOfflineScore(args, results)
+elif args.mode == 'online':
+    score_model = OVOBenchOnlineScore(args, results)
 else:
     raise ValueError(f"Unsupported model: {args.model}. Please implement the model.")
 
