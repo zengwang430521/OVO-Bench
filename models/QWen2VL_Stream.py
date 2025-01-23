@@ -32,7 +32,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
         model = Qwen2VLStream.from_pretrained(
             model_path,
             torch_dtype=torch.bfloat16,
-            # attn_implementation="flash_attention_2",
+            attn_implementation="flash_attention_2",
             device_map="auto",
         )
 
