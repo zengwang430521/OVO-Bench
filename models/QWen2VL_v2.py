@@ -167,8 +167,8 @@ class EvalQWen2VL2(OVOBenchOffline):
 
         outputs = self.llm.generate([llm_inputs], sampling_params=self.sampling_params)
         response = outputs[0].outputs[0].text
-        print(f"Prompt:\n{prompt}")
-        print(f"Response:\n{response}")
+        print(f"Prompt:{prompt}")
+        print(f"Response:{response}")
         return response
 
     def eval(self, anno, task_list, mode="offline"):
