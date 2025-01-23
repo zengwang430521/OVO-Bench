@@ -16,92 +16,6 @@ import argparse
 from peft import LoraConfig, LoraModel, PeftModel, TaskType, get_peft_model
 
 
-def _read_video_decord_v2(
-    ele: dict,
-) -> torch.Tensor:
-    """read video using decord.VideoReader
-
-    Args:
-        ele (dict): a dict contains the configuration of video.
-        support keys:
-            - video: the path of video. support "file://", "http://", "https://" and local path.
-            - video_start: the start time of video.
-            - video_end: the end time of video.
-    Returns:
-        torch.Tensor: the video tensor with shape (T, C, H, W).
-    """
-    import decord
-    video_path = ele["video"]
-    start_time, end_time = ele.get("start_time", None), ele.get("end_time", None)
-    st = time.time()
-    vr = decord.VideoReader(video_path)
-    # TODO: support start_pts and end_pts
-    if 'video_start' in ele or 'video_end' in ele:
-        raise NotImplementedError("not support start_pts and end_pts in decord for now.")
-    total_frames, video_fps = len(vr), vr.get_avg_fps()
-    logger.info(f"decord:  {video_path=}, {total_frames=}, {video_fps=}, time={time.time() - st:.3f}s")
-
-    idx_start, idx_end = 0, total_frames - 1
-    if start_time is not None:
-        idx_start = max(round(start_time * video_fps), idx_start)
-    if end_time is not None:
-        idx_end = min(round(end_time * video_fps), idx_end)
-
-    nframes = smart_nframes(ele, total_frames=(idx_end - idx_start + 1), video_fps=video_fps)
-    idx = torch.linspace(idx_start, idx_end, nframes).round().long().tolist()
-    video = vr.get_batch(idx).asnumpy()
-    video = torch.tensor(video).permute(0, 3, 1, 2)  # Convert to TCHW format
-    return video
-
-
-def fetch_video_v2(ele: dict, image_factor: int = IMAGE_FACTOR) -> torch.Tensor | list[Image.Image]:
-    if isinstance(ele["video"], str):
-        # video_reader_backend = get_video_reader_backend()
-        # video = VIDEO_READER_BACKENDS[video_reader_backend](ele)
-        # import pdb; pdb.set_trace()
-        video = _read_video_decord_v2(ele)
-        nframes, _, height, width = video.shape
-
-        min_pixels = ele.get("min_pixels", VIDEO_MIN_PIXELS)
-        total_pixels = ele.get("total_pixels", VIDEO_TOTAL_PIXELS)
-        max_pixels = max(min(VIDEO_MAX_PIXELS, total_pixels / nframes * FRAME_FACTOR), int(min_pixels * 1.05))
-        max_pixels = ele.get("max_pixels", max_pixels)
-        if "resized_height" in ele and "resized_width" in ele:
-            resized_height, resized_width = smart_resize(
-                ele["resized_height"],
-                ele["resized_width"],
-                factor=image_factor,
-            )
-        else:
-            resized_height, resized_width = smart_resize(
-                height,
-                width,
-                factor=image_factor,
-                min_pixels=min_pixels,
-                max_pixels=max_pixels,
-            )
-        video = transforms.functional.resize(
-            video,
-            [resized_height, resized_width],
-            interpolation=InterpolationMode.BICUBIC,
-            antialias=True,
-        ).float()
-        return video
-    else:
-        assert isinstance(ele["video"], (list, tuple))
-        process_info = ele.copy()
-        process_info.pop("type", None)
-        process_info.pop("video", None)
-        images = [
-            fetch_image({"image": video_element, **process_info}, size_factor=image_factor)
-            for video_element in ele["video"]
-        ]
-        nframes = ceil_by_factor(len(images), FRAME_FACTOR)
-        if len(images) < nframes:
-            images.extend([images[-1]] * (nframes - len(images)))
-        return images
-
-
 class EvalQWen2VLStream(OVOBenchOffline):
     def __init__(self, args) -> None:
         super().__init__(args)
@@ -144,14 +58,14 @@ class EvalQWen2VLStream(OVOBenchOffline):
             end_time,
             check_time_step=1.0,
             only_one_response=False):
-        # import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         print(f"(Time: {query_time}) User:{prompt}")
 
         ele = {
             "type": "video",
             "video": video_file_name,
             "fps": self.fps,
-            "max_pixels": 256*256,
+            # "max_pixels": 256*256,
         }
         # 视频对象
         vr = decord.VideoReader(video_file_name)
