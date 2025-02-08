@@ -104,7 +104,7 @@ class EvalQWen2VL2(OVOBenchOffline):
     def _model_init(self):
         model_path = self.args.model_path
         self.llm = LLM(
-            model = model_path,
+            model=model_path,
             dtype=torch.bfloat16,
             gpu_memory_utilization=0.7,
         )
@@ -120,7 +120,8 @@ class EvalQWen2VL2(OVOBenchOffline):
         self.processor = AutoProcessor.from_pretrained(model_path)
 
     def inference(self, video_file_name, prompt, start_time, end_time):
-        # import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
+
         messages = [
             {
                 "role": "user",
