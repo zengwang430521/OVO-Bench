@@ -120,8 +120,7 @@ class EvalQWen2VL2(OVOBenchOffline):
         self.processor = AutoProcessor.from_pretrained(model_path)
 
     def inference(self, video_file_name, prompt, start_time, end_time):
-        import pdb; pdb.set_trace()
-
+        # import pdb; pdb.set_trace()
         messages = [
             {
                 "role": "user",
@@ -139,11 +138,7 @@ class EvalQWen2VL2(OVOBenchOffline):
             }
         ]
 
-        prompt = self.processor.apply_chat_template(
-            messages,
-            tokenize=False,
-            add_generation_prompt=True,
-        )
+        prompt = self.processor.apply_chat_template(messages,tokenize=False,add_generation_prompt=True)
 
         # image_inputs, video_inputs = process_vision_info(messages)
         image_inputs = None
