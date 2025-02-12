@@ -7,6 +7,8 @@ import os
 import json
 from models import *
 import os
+from tqdm import tqdm
+
 
 parser = argparse.ArgumentParser(description='Run OVBench')
 parser.add_argument("--anno_path", type=str, default="data/ovo_bench.json", help="Path to the annotations")
@@ -69,6 +71,7 @@ with open(args.anno_path, "r") as f:
 for i, item in enumerate(annotations):
     annotations[i]["video"] = os.path.join(args.video_dir, item["video"])
 
+print('load annotation')
 backward_anno = []
 realtime_anno = []
 forward_anno = []
@@ -76,7 +79,7 @@ backward_tasks = ["EPM", "ASI", "HLD"]
 realtime_tasks = ["STU", "OJR", "ATR", "ACR", "OCR", "FPD"]
 forward_tasks = ["REC", "SSR", "CRR"]
 
-for anno in annotations:
+for anno in tqdm(annotations):
     if anno["task"] in args.task:
         if anno["task"] in backward_tasks:
             backward_anno.append(anno)
@@ -92,4 +95,5 @@ anno = {
     "forward": forward_anno
 }
 
+print('begin eval!')
 model.eval(anno, args.task, args.mode)
