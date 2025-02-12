@@ -138,12 +138,14 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
             for msg, vid in historys:
                 all_frame_num += 0 if vid is None else len(vid)
             pop_num = all_frame_num - self.max_frame_num
-            while pop_num > 0:
-                # 删除最靠前的帧
+
+            if pop_num > 0:
                 # past_key_values 不能用了
                 nonlocal past_key_values, rope_deltas
                 past_key_values, rope_deltas = None, None
 
+            while pop_num > 0:
+                # 删除最靠前的帧
                 # 先找到最老的历史帧
                 for i in range(len(historys)):
                     msg, vid = historys[i]
@@ -299,6 +301,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                 check_times.append(t)
                 t += check_time_step
         check_times = [min(t, end_time) for t in check_times]
+        check_times = sorted(check_times)
 
         cur_time += frame_time_step
         while True:
@@ -310,6 +313,10 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
             while cur_time < check_times[0]:
                 new_sample_times.append(cur_time)
                 cur_time += frame_time_step
+
+            if len(new_sample_times) == 0:
+                del check_times[0]
+                continue
 
             new_sample_idxs = [round(t * video_fps) for t in new_sample_times]
             new_frames = get_frames(new_sample_idxs)
@@ -411,6 +418,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                 # test_info = _anno_["test_info"]
 
                 test_times = [t["realtime"] for t in _anno_['test_info']]
+                test_times = sorted(test_times)
                 end_time = max(test_times) + 3
 
                 if "ask_time" in _anno_.keys():
@@ -446,6 +454,16 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                         )
                 except:
                     force_response, all_responses = None, None
+                    # import pdb; pdb.set_trace()
+                    # force_response, all_responses = self.inference(
+                    #     video,
+                    #     prompt,
+                    #     start_time=0,
+                    #     query_time=query_time,
+                    #     end_time=end_time,
+                    #     only_one_response=False,
+                    #     check_times=test_times
+                    # )
 
                 _anno_["force_response"] = force_response
                 _anno_["all_responses"] = all_responses

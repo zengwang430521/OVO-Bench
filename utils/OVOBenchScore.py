@@ -166,7 +166,7 @@ def get_realtime_response(all_responses, realtime):
     response = None
     for i in range(len(all_responses)):
         t, res = all_responses[i]
-        if realtime > t and res is not None:
+        if realtime >= t and res is not None:
             response = res
     return response
 
@@ -251,6 +251,8 @@ class OVOBenchOnlineScore(OVOBenchOfflineScore):
                     response = get_realtime_response(all_responses, realtime)
                     gt = get_realtime_response(gt_responses, realtime)
                     scores["SSR"].append(get_score_SSR(response, gt))
+
+
             
             # Calculate score for CRR
             if result["task"] == "CRR":

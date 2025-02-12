@@ -1,6 +1,5 @@
 from transformers import AutoProcessor
 
-
 model_path = '/afs/zengwang/ckpt/Qwen2-VL-7B'
 processor = AutoProcessor.from_pretrained(model_path)
 messages = [
