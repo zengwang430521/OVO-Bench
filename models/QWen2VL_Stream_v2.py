@@ -132,6 +132,8 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
 
         def update_frames(new_frames):
             # 首先插入最后
+            if historys[-1][1] is None:
+                historys.append([video_message, []])
             historys[-1][1] += new_frames
             # 然后判断是不是要删除前面的帧数
             all_frame_num = 0
@@ -162,6 +164,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                     pop_num -= len(vid)
 
         def need_response():
+            # import pdb; pdb.set_trace()
             messages = []
             videos = []
             for msg, vid in historys:
@@ -237,7 +240,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
             '''找到判别点'''
             last_vid_token_index = (inputs["input_ids"] == video_token_id).nonzero(as_tuple=True)[1].max().item()
             last_end_token_index = (inputs["input_ids"] == end_token_id).nonzero(as_tuple=True)[1].max().item()
-            if last_end_token_index > last_vid_token_index + 1:
+            if last_end_token_index > last_vid_token_index + 2:
                 judge_token_index = last_end_token_index
             else:
                 judge_token_index = last_vid_token_index
@@ -245,6 +248,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
             stream_logits = output.stream_logits
             last_logits = stream_logits[0, judge_token_index]
             result = last_logits[1] > last_logits[0]
+            # import pdb; pdb.set_trace()
             return result.item()
 
         def get_response():
@@ -322,7 +326,8 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
             new_frames = get_frames(new_sample_idxs)
             update_frames(new_frames)
 
-            if need_response():
+            flag = need_response()
+            if flag:
                 response = get_response()
                 all_responses.append((cur_time, response))
                 historys.append([{"role": "assistant", "content": force_response}, None])
@@ -332,6 +337,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                 if not only_one_response:
                     # only_one_response 模式下，加入None会让推理提前停止
                     all_responses.append((cur_time, None))
+                # historys.append([video_message, []])
                 print(f"(Time: {cur_time})")
 
             cur_time = new_sample_times[-1]
