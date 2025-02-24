@@ -337,7 +337,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                 if not only_one_response:
                     # only_one_response 模式下，加入None会让推理提前停止
                     all_responses.append((cur_time, None))
-                historys.append([video_message, []])
+                # historys.append([video_message, []])
                 print(f"(Time: {cur_time})")
 
             cur_time = new_sample_times[-1]
