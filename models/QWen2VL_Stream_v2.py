@@ -17,8 +17,8 @@ import argparse
 from peft import LoraConfig, LoraModel, PeftModel, TaskType, get_peft_model
 import os
 
-# FAST_TEST = True
-FAST_TEST = False
+DENSE_TEST = True
+# DENSE_TEST = False
 
 class EvalQWen2VLStreamV2(OVOBenchOffline):
     def __init__(self, args) -> None:
@@ -448,7 +448,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                             query_time=query_time,
                             end_time=end_time,
                             only_one_response=True,
-                            check_times=test_times if FAST_TEST else None
+                            check_times=None if DENSE_TEST else test_times
                         )
                     else:
                         force_response, all_responses = self.inference(
@@ -458,7 +458,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                             query_time=query_time,
                             end_time=end_time,
                             only_one_response=False,
-                            check_times=test_times if FAST_TEST else None
+                            check_times=None if DENSE_TEST else test_times
                         )
                 except:
                     force_response, all_responses = None, None
