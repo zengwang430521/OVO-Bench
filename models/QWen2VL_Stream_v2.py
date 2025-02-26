@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from utils.OVOBench import OVOBenchOffline
 from transformers import AutoProcessor
-from vllm import LLM, SamplingParams
+# from vllm import LLM, SamplingParams
 from qwen_vl_utils import process_vision_info
 from tqdm import tqdm
 from qwen_vl_utils.vision_process import *
@@ -17,6 +17,8 @@ import argparse
 from peft import LoraConfig, LoraModel, PeftModel, TaskType, get_peft_model
 import os
 
+# FAST_TEST = True
+FAST_TEST = False
 
 class EvalQWen2VLStreamV2(OVOBenchOffline):
     def __init__(self, args) -> None:
@@ -446,7 +448,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                             query_time=query_time,
                             end_time=end_time,
                             only_one_response=True,
-                            check_times=test_times
+                            check_times=test_times if FAST_TEST else None
                         )
                     else:
                         force_response, all_responses = self.inference(
@@ -456,7 +458,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                             query_time=query_time,
                             end_time=end_time,
                             only_one_response=False,
-                            check_times=test_times
+                            check_times=test_times if FAST_TEST else None
                         )
                 except:
                     force_response, all_responses = None, None
