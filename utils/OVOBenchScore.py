@@ -5,6 +5,33 @@ class OVOBenchOnlineScore():
     def eval():
         pass
 
+import matplotlib.pyplot as plt
+def plot_histogram(data, bins=10, title="Histogram", xlabel="Value", ylabel="Frequency", save_path=None):
+    """
+    绘制直方图，并可选择保存图片。
+
+    参数：
+    - data: list or array-like, 数据列表
+    - bins: int, 直方图的分箱数
+    - title: str, 图表标题
+    - xlabel: str, X 轴标签
+    - ylabel: str, Y 轴标签
+    - save_path: str, 如果提供路径，则保存图片，否则显示图片
+    """
+    plt.figure(figsize=(8, 6))
+    plt.hist(data, bins=bins, edgecolor='black')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+    if save_path:
+        plt.savefig(save_path, dpi=400, bbox_inches='tight')  # dpi=300 确保高质量，bbox_inches='tight' 去除多余空白
+        print(f"图片已保存至: {save_path}")
+    else:
+        plt.show()
+
+
+
 class OVOBenchOfflineScore():
     def __init__(self, args, results):
         self.args = args
@@ -45,6 +72,10 @@ class OVOBenchOfflineScore():
         tasks = list(set([result["task"] for result in results]))
         for task in tasks:
             scores[task] = []
+        errors = {}
+        for task in tasks:
+            errors[task] = []
+
         for i, result in enumerate(results):
             # Calculate score for REC
             if result["task"] == "REC":
@@ -60,12 +91,26 @@ class OVOBenchOfflineScore():
                     scores["SSR"].append(get_score_SSR_CRR(test_info_["response"], gt))
             # Calculate score for CRR
             if result["task"] == "CRR":
+                gt_response_time = result['clue_time']
+                pred_response_time = 0
+                for tmp in result['test_info']:
+                    pred_response_time = tmp['realtime']
+                    if tmp['response'] == "Yes":
+                        break
+                errors["CRR"].append(pred_response_time - gt_response_time)
+
+
                 for j, test_info_ in enumerate(result["test_info"]):
                     if (test_info_["response"] == "N" and test_info_["type"] == 0) or (test_info_["response"] == "Y" and test_info_["type"] == 1):
                         scores["CRR"].append(1)
                         continue
                     gt = "No" if test_info_["type"] == 0 else "Yes"
                     scores["CRR"].append(get_score_SSR_CRR(test_info_["response"], gt))
+
+        plot_histogram(errors["CRR"], bins=100, save_path="CRR.png")
+        abs_err = [abs(t) for t in errors["CRR"]]
+        print(f'CRR mean error: {sum(abs_err) / len(abs_err)}')
+            
         return results, scores
     
     def score(self):
@@ -225,6 +270,11 @@ class OVOBenchOnlineScore(OVOBenchOfflineScore):
         tasks = list(set([result["task"] for result in results]))
         for task in tasks:
             scores[task] = []
+            
+        errors = {}
+        for task in tasks:
+            errors[task] = []
+        
         for i, result in enumerate(results):
             all_responses = result["all_responses"]
 
@@ -256,10 +306,27 @@ class OVOBenchOnlineScore(OVOBenchOfflineScore):
             
             # Calculate score for CRR
             if result["task"] == "CRR":
+                gt_response_time = result['clue_time']
+                if len(result['all_responses']) == 0:
+                    test_times = [t["realtime"] for t in result['test_info']]
+                    test_times = sorted(test_times)
+                    end_time = max(test_times) + 3
+                    pred_response_time = end_time
+                else:
+                    pred_response_time = result['all_responses'][0][0]
+                errors["CRR"].append(pred_response_time - gt_response_time)
+                
                 for j, test_info_ in enumerate(result["test_info"]):
                     realtime = test_info_["realtime"]
                     response = get_realtime_response(all_responses, realtime)
                     scores["CRR"].append(get_score_CRR(response, test_info_["type"]))
+        
+        
+        plot_histogram(errors["CRR"], bins=100, save_path="CRR.png")
+        abs_err = [abs(t) for t in errors["CRR"]]
+        print(f'CRR mean error: {sum(abs_err)/len(abs_err)}')
+        print(f'CRR PCK: {sum([1 if t<2 else 0 for t in abs_err])/len(abs_err)}')
+
         return results, scores
 
     def score(self):

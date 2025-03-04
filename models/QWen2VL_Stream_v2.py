@@ -16,8 +16,10 @@ from tqdm import tqdm
 import argparse
 from peft import LoraConfig, LoraModel, PeftModel, TaskType, get_peft_model
 import os
+import textwrap
 
-DENSE_TEST = True
+
+# DENSE_TEST = True
 # DENSE_TEST = False
 
 class EvalQWen2VLStreamV2(OVOBenchOffline):
@@ -348,6 +350,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
 
     def eval(self, anno, task_list, mode="offline"):
         # import pdb; pdb.set_trace()
+        DENSE_TEST = self.args.dense
 
         # Inference
         if len(anno["backward"]) > 0:
@@ -515,7 +518,6 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                 Provide your answer as a single number (e.g., 0, 1, 2, 3…) indicating the total count.
                 Do not include any additional text or explanation in your response.
             """
-
         elif task == "SSR":
             tutorial = _anno_["tutorial"]
             all_steps = _anno_["all_steps"]
@@ -533,4 +535,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
             question = _anno_["question"]
             answer = _anno_["answer"]
             prompt = f"""{question}"""
+
+        # 去除不必要的缩进
+        prompt = textwrap.dedent(prompt)
         return prompt

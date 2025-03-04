@@ -29,6 +29,7 @@ parser.add_argument("--gemini_project", type=str, required=False, default=None)
 # For local running model init
 parser.add_argument("--model_path", type=str, required=False, default=None)
 parser.add_argument("--lora_path", type=str, required=False, default=None)
+parser.add_argument('--dense', action='store_true', help="dense evaluate")
 
 args = parser.parse_args()
 
