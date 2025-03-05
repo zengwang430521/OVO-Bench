@@ -432,12 +432,14 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                 test_times = sorted(test_times)
                 end_time = max(test_times) + 3
 
+                query_time = max(min(test_times) - 1, 0)
                 if "ask_time" in _anno_.keys():
-                    query_time = _anno_["ask_time"]
+                    query_time = min(_anno_["ask_time"], query_time)
                 elif "start_times" in _anno_.keys():
-                    query_time = max(_anno_["start_times"][0] - 1, 0)
+                    query_time = min(max(_anno_["start_times"][0] - 1, 0), query_time)
                 elif "start_time" in _anno_.keys():
-                    query_time = max(_anno_["start_time"][0] - 1, 0)
+                    query_time = min(max(_anno_["start_time"][0] - 1, 0), query_time)
+
 
                 prompt = self.build_prompt(task=task, question=None, options=None, _anno_=_anno_, index=None)
                 try:
@@ -573,7 +575,7 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
         messages.append({"role": "system", "content": system_prompt, 'time': [0, 0]})
         if query_time > 0:
             messages.append({"role": "user", "content": "<video>", "time": [0, query_time]})
-        messages.append({"role": "user", "content": "prompt", "time": [query_time, query_time]})
+        messages.append({"role": "user", "content": prompt, "time": [query_time, query_time]})
         cur_time = query_time
 
         def get_frames(frame_idxs):
@@ -793,195 +795,3 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
                 print(f"(Time: {cur_time})")
 
         return force_response, all_responses
-
-    def eval(self, anno, task_list, mode="offline"):
-        # import pdb; pdb.set_trace()
-        DENSE_TEST = self.args.dense
-
-        # Inference
-        if len(anno["backward"]) > 0:
-            backward_results = []
-            for _anno_ in tqdm(anno["backward"], desc="Backward Tasks"):
-                id = _anno_["id"]
-                video = _anno_["video"]
-                task = _anno_["task"]
-                question = _anno_["question"]
-                options = _anno_["options"]
-                realtime = _anno_["realtime"]
-                assert not question == None
-                assert not options == None
-                prompt = self.build_prompt(task=task, question=question, options=options, _anno_=None, index=None)
-                try:
-                    # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
-                    # response = self.inference(chunk_video_path, prompt)
-                    force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime,
-                                                                   end_time=realtime + 3, only_one_response=True)
-                except Exception as e:
-                    print(f"Error during inference: {e}")
-                    force_response, all_responses = None, None
-
-                result = {
-                    "id": id,
-                    "video": video,
-                    "task": task,
-                    "question": question,
-                    # "response": response,
-                    "force_response": force_response,
-                    "all_responses": all_responses,
-                    "ground_truth": chr(65 + _anno_["gt"])
-                }
-                backward_results.append(result)
-
-        if len(anno["realtime"]) > 0:
-            realtime_results = []
-            for _anno_ in tqdm(anno["realtime"], desc="Realtime Tasks"):
-                id = _anno_["id"]
-                video = _anno_["video"]
-                task = _anno_["task"]
-                question = _anno_["question"]
-                options = _anno_["options"]
-                realtime = _anno_["realtime"]
-                assert not question == None
-                assert not options == None
-                prompt = self.build_prompt(task=task, question=question, options=options, _anno_=None, index=None)
-                try:
-                    # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
-                    # response = self.inference(chunk_video_path, prompt)
-                    # response = self.inference(video, prompt, start_time=0, end_time=realtime)
-                    force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime,
-                                                                   end_time=realtime + 3, only_one_response=True)
-                except Exception as e:
-                    print(f"Error during inference: {e}")
-                    force_response, all_responses = None, None
-
-                result = {
-                    "id": id,
-                    "video": video,
-                    "task": task,
-                    "question": question,
-                    # "response": response,
-                    "force_response": force_response,
-                    "all_responses": all_responses,
-                    "ground_truth": chr(65 + _anno_["gt"])
-                }
-                realtime_results.append(result)
-
-        if len(anno["forward"]) > 0:
-            forward_results = []
-            for _anno_ in tqdm(anno["forward"], desc="Forward Tasks"):
-                id = _anno_["id"]
-                video = _anno_["video"]
-                task = _anno_["task"]
-                # test_info = _anno_["test_info"]
-
-                test_times = [t["realtime"] for t in _anno_['test_info']]
-                test_times = sorted(test_times)
-                end_time = max(test_times) + 3
-
-                if "ask_time" in _anno_.keys():
-                    query_time = _anno_["ask_time"]
-                elif "start_times" in _anno_.keys():
-                    query_time = max(_anno_["start_times"][0] - 1, 0)
-                elif "start_time" in _anno_.keys():
-                    query_time = max(_anno_["start_time"][0] - 1, 0)
-
-                prompt = self.build_prompt(task=task, question=None, options=None, _anno_=_anno_, index=None)
-                try:
-                    # 为了测试得快一点，只在几个时间点进行测试
-                    if task == 'CRR':
-                        # crr 只需要回复一次就可以了
-                        force_response, all_responses = self.inference(
-                            video,
-                            prompt,
-                            start_time=0,
-                            query_time=query_time,
-                            end_time=end_time,
-                            only_one_response=True,
-                            check_times=None if DENSE_TEST else test_times
-                        )
-                    else:
-                        force_response, all_responses = self.inference(
-                            video,
-                            prompt,
-                            start_time=0,
-                            query_time=query_time,
-                            end_time=end_time,
-                            only_one_response=False,
-                            check_times=None if DENSE_TEST else test_times
-                        )
-                except:
-                    force_response, all_responses = None, None
-                    # import pdb; pdb.set_trace()
-                    # force_response, all_responses = self.inference(
-                    #     video,
-                    #     prompt,
-                    #     start_time=0,
-                    #     query_time=query_time,
-                    #     end_time=end_time,
-                    #     only_one_response=False,
-                    #     check_times=test_times
-                    # )
-
-                _anno_["force_response"] = force_response
-                _anno_["all_responses"] = all_responses
-                forward_results.append(_anno_)
-
-        # Calculate Score
-        if len(anno["backward"]) == 0:
-            backward_results = []
-        if len(anno["realtime"]) == 0:
-            realtime_results = []
-        if len(anno["forward"]) == 0:
-            forward_results = []
-
-        # Save Results
-        if self.args.save_results:
-            os.makedirs(f"{self.args.result_dir}/{self.args.model}", exist_ok=True)
-            with open(f"{self.args.result_dir}/{self.args.model}/{self.args.model}_{'_'.join(task_list)}_{mode}_1.json",
-                      "w") as f:
-                json.dump({
-                    "backward": backward_results,
-                    "realtime": realtime_results,
-                    "forward": forward_results
-                }, f, indent=4)
-
-    def build_prompt(self, task, question, options, _anno_, index):
-        if task in ["EPM", "ASI", "HLD", "STU", "OJR", "ATR", "ACR", "OCR", "FPD"]:
-            formatted_options = '; '.join(f'{chr(65 + i)}. {option}' for i, option in enumerate(options)) + ';'
-            prompt = f"""
-                Question: {question}
-                Options:
-                {formatted_options}
-                Respond only with the letter corresponding to your chosen option (e.g., A, B, C). 
-                Do not include any additional text or explanation in your response.
-            """
-        elif task == "REC":
-            activity = _anno_["activity"]
-            prompt = f""" 
-                In the video, the man/woman is {activity} repetitively. 
-                Your task is to count how many times he/she has completed the action of {activity}.
-                Remind me every time when he/she finishes one.
-                Provide your answer as a single number (e.g., 0, 1, 2, 3…) indicating the total count.
-                Do not include any additional text or explanation in your response.
-            """
-        elif task == "SSR":
-            tutorial = _anno_["tutorial"]
-            all_steps = _anno_["all_steps"]
-            formatted_steps = '; '.join(f'{chr(65 + i)}. {step}' for i, step in enumerate(all_steps)) + ';'
-            prompt = f"""
-                You're watching a tutorial video of {tutorial}. It contains the following steps:
-                {formatted_steps}
-                Your task is to tell me what step the video is at.
-                Remind me every time when he/she turns to a new step.
-                Respond only with the letter corresponding to current step (e.g., A, B, C). 
-                Do not include any additional text or explanation in your response.
-            """
-
-        elif task == "CRR":
-            question = _anno_["question"]
-            answer = _anno_["answer"]
-            prompt = f"""{question}"""
-
-        # 去除不必要的缩进
-        prompt = textwrap.dedent(prompt)
-        return prompt
