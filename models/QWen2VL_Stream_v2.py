@@ -32,8 +32,8 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
         self.max_frame_num = 64
 
     def _model_init(self):
-        import pdb;pdb.set_trace()
-        print('Load model')
+        # import pdb;pdb.set_trace()
+        # print('Load model')
 
         model_path = self.args.model_path
         lora_path = self.args.lora_path
@@ -784,6 +784,7 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
         last_time = cur_time
 
         for cur_time in check_times:
+            import pdb; pdb.set_trace()
             if only_one_response and len(all_responses) > 0:
                 break
 
