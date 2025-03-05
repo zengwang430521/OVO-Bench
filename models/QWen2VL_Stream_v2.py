@@ -797,7 +797,7 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
             if flag:
                 response = get_response()
                 all_responses.append((cur_time, response))
-                messages.append({"role": "assistant", "content": force_response, "time": [cur_time, cur_time]})
+                messages.append({"role": "assistant", "content": response, "time": [cur_time, cur_time]})
                 last_time = cur_time
                 print(f"(Time: {cur_time}) Assistant:{response}")
             else:
