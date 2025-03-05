@@ -434,7 +434,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                 # test_info = _anno_["test_info"]
 
                 test_times = [t["realtime"] for t in _anno_['test_info']]
-                test_times = sorted(test_times)
+                test_times = sorted(list(set(test_times)))
                 end_time = max(test_times) + 3
 
                 query_time = max(min(test_times) - 1, 0)
