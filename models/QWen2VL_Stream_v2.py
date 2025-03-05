@@ -609,7 +609,7 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
                 antialias=True,
             ).float()
             # import pdb; pdb.set_trace()
-            frames = list(torch.split(frames, 1, dim=0))  # 分成list便于处理
+            # frames = list(torch.split(frames, 1, dim=0))  # 分成list便于处理
             return frames
 
         def get_videos():
