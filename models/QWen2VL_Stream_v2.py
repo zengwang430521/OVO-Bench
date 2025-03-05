@@ -32,6 +32,9 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
         self.max_frame_num = 64
 
     def _model_init(self):
+        import pdb;pdb.set_trace()
+        print('Load model')
+
         model_path = self.args.model_path
         lora_path = self.args.lora_path
 
