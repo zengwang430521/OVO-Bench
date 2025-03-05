@@ -747,16 +747,17 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
             return output_text
 
         # 先在 query time 强制回答一次
-        videos = get_videos()
-        flag = need_response()
-        force_response = get_response()
-        all_responses = []
-        if flag:
-            all_responses.append((cur_time, force_response))
-            messages.append({"role": "assistant", "content": force_response, "time": [cur_time, cur_time]})
-            print(f"(Time: {cur_time}) Assistant:{force_response}")
-        else:
-            print(f"(Time: {cur_time})")
+        if query_time > 0:
+            videos = get_videos()
+            flag = need_response()
+            force_response = get_response()
+            all_responses = []
+            if flag:
+                all_responses.append((cur_time, force_response))
+                messages.append({"role": "assistant", "content": force_response, "time": [cur_time, cur_time]})
+                print(f"(Time: {cur_time}) Assistant:{force_response}")
+            else:
+                print(f"(Time: {cur_time})")
 
         # stream 循环处理
 
