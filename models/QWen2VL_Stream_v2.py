@@ -558,6 +558,8 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
         import pdb; pdb.set_trace()
 
         print(f"(Time: {query_time}) User:{prompt}")
+        print(check_times)
+
         video_token_id = 151656  # <|vision_pad|>
         end_token_id = 151645   # <|im_end|>
 
@@ -749,17 +751,19 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
             return output_text
 
         # 先在 query time 强制回答一次
+        all_responses = []
+        force_response = None
         if query_time > 0:
             videos = get_videos()
             flag = need_response()
             force_response = get_response()
-            all_responses = []
             if flag:
                 all_responses.append((cur_time, force_response))
                 messages.append({"role": "assistant", "content": force_response, "time": [cur_time, cur_time]})
                 print(f"(Time: {cur_time}) Assistant:{force_response}")
             else:
                 print(f"(Time: {cur_time})")
+
 
         # stream 循环处理
 
