@@ -673,6 +673,7 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
                 sample_idxs = (sample_times * real_fps).round().astype(np.int32)
                 sample_idxs = sample_idxs.clip(min=0, max=total_frames - 1)
                 frame_idxs.append(sample_idxs)
+                frame_times.append(sample_times)
 
             # 采样
             videos = []
