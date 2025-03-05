@@ -705,8 +705,6 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
             )
             inputs = inputs.to("cuda")
 
-            nonlocal past_key_values, rope_deltas
-
             if past_key_values is None:
                 past_key_values = DynamicCache()
 
