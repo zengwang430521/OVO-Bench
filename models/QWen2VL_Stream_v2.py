@@ -692,6 +692,8 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
         past_key_values, rope_deltas = None, None
         def need_response():
             nonlocal past_key_values, rope_deltas
+            past_key_values, rope_deltas = None, None
+
             text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=False)
             inputs = self.processor(text=[text], images=None, videos=videos, padding=True, return_tensors="pt")
             # 这是一个重要的bug
@@ -752,7 +754,6 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
             )
             output_text = output_text[0]
 
-            past_key_values, rope_deltas = None, None
             return output_text
 
         # 先在 query time 强制回答一次
