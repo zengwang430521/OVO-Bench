@@ -107,9 +107,10 @@ class OVOBenchOfflineScore():
                     gt = "No" if test_info_["type"] == 0 else "Yes"
                     scores["CRR"].append(get_score_SSR_CRR(test_info_["response"], gt))
 
-        plot_histogram(errors["CRR"], bins=100, save_path="CRR.png")
-        abs_err = [abs(t) for t in errors["CRR"]]
-        print(f'CRR mean error: {sum(abs_err) / len(abs_err)}')
+        if "CRR" in errors.keys():
+            plot_histogram(errors["CRR"], bins=100, save_path="CRR.png")
+            abs_err = [abs(t) for t in errors["CRR"]]
+            print(f'CRR mean error: {sum(abs_err) / len(abs_err)}')
             
         return results, scores
     
@@ -321,11 +322,11 @@ class OVOBenchOnlineScore(OVOBenchOfflineScore):
                     response = get_realtime_response(all_responses, realtime)
                     scores["CRR"].append(get_score_CRR(response, test_info_["type"]))
         
-        
-        plot_histogram(errors["CRR"], bins=100, save_path="CRR.png")
-        abs_err = [abs(t) for t in errors["CRR"]]
-        print(f'CRR mean error: {sum(abs_err)/len(abs_err)}')
-        print(f'CRR PCK: {sum([1 if t<2 else 0 for t in abs_err])/len(abs_err)}')
+        if "CRR" in errors.keys():
+            plot_histogram(errors["CRR"], bins=100, save_path="CRR.png")
+            abs_err = [abs(t) for t in errors["CRR"]]
+            print(f'CRR mean error: {sum(abs_err)/len(abs_err)}')
+            print(f'CRR PCK: {sum([1 if t<2 else 0 for t in abs_err])/len(abs_err)}')
 
         return results, scores
 
