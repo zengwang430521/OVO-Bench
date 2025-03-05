@@ -570,7 +570,7 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
 
         messages = []
         system_prompt = "You are a helpful assistant."
-        messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "system", "content": system_prompt, 'time': [0, 0]})
         if query_time > 0:
             messages.append({"role": "user", "content": "<video>", "time": [0, query_time]})
         messages.append({"role": "user", "content": "prompt", "time": [query_time, query_time]})
@@ -675,6 +675,7 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
             videos = []
             for sample_idxs in frame_idxs:
                 videos.append(get_frames(sample_idxs))
+            return videos
 
 
         past_key_values, rope_deltas = None, None
