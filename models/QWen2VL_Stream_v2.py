@@ -574,7 +574,8 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
         system_prompt = "You are a helpful assistant."
         messages.append({"role": "system", "content": system_prompt, 'time': [0, 0]})
         if query_time > 0:
-            messages.append({"role": "user", "content": "<video>", "time": [0, query_time]})
+            messages.append({"role": "user", "content": [ele, {"type": "text", "text": ""}], "time": [0, query_time]})
+
         messages.append({"role": "user", "content": prompt, "time": [query_time, query_time]})
         cur_time = query_time
 
@@ -618,7 +619,7 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
             video_time_segs = []
             for message in messages:
                 content = message["content"]
-                if "<video>" in content:
+                if isinstance(content, list):
                     time = message['time']
                     for i in range(0, len(time), 2):
                         video_time_segs.append([time[i], time[i + 1]])
@@ -779,7 +780,7 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
             if "<video>" in messages[-1]["content"]:
                 messages[-1]['time'] = [last_time, cur_time]
             else:
-                messages.append({"role": "user", "content": "<video>", "time": [last_time, cur_time]})
+                messages.append({"role": "user", "content": [ele, {"type": "text", "text": ""}],"time": [last_time, cur_time]})
 
             videos = get_videos()
             flag = need_response()
