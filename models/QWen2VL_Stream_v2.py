@@ -777,7 +777,7 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
             if only_one_response and len(all_responses) > 0:
                 break
 
-            if "<video>" in messages[-1]["content"]:
+            if isinstance(messages[-1]["content"]):
                 messages[-1]['time'] = [last_time, cur_time]
             else:
                 messages.append({"role": "user", "content": [ele, {"type": "text", "text": ""}],"time": [last_time, cur_time]})
