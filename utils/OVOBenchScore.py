@@ -6,7 +6,7 @@ class OVOBenchOnlineScore():
         pass
 
 import matplotlib.pyplot as plt
-def plot_histogram(data, bins=10, title="Histogram", xlabel="Value", ylabel="Frequency", save_path=None):
+def plot_histogram(data, bins=10, title="Histogram", xlabel="Value", ylabel="Frequency", save_path=None, **kwargs):
     """
     绘制直方图，并可选择保存图片。
 
@@ -19,7 +19,7 @@ def plot_histogram(data, bins=10, title="Histogram", xlabel="Value", ylabel="Fre
     - save_path: str, 如果提供路径，则保存图片，否则显示图片
     """
     plt.figure(figsize=(8, 6))
-    plt.hist(data, bins=bins, edgecolor='black')
+    plt.hist(data, bins=bins, edgecolor='black', **kwargs)
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
