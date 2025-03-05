@@ -46,8 +46,8 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
         )
 
         if lora_path is not None:
-            import pdb; pdb.set_trace()
-            print('Debug: load lora')
+            # import pdb; pdb.set_trace()
+            # print('Debug: load lora')
             model = PeftModel.from_pretrained(model, lora_path)
             model = model.merge_and_unload()
         model = model.eval()
@@ -560,7 +560,7 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
             check_time_step=1.0,
             check_times=None,
             only_one_response=False):
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
         print(f"(Time: {query_time}) User:{prompt}")
         print(check_times)
@@ -785,7 +785,7 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
         last_time = cur_time
 
         for cur_time in check_times:
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             if only_one_response and len(all_responses) > 0:
                 break
 
