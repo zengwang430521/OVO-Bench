@@ -174,6 +174,11 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
 
         def need_response():
             # import pdb; pdb.set_trace()
+            nonlocal past_key_values, rope_deltas
+            # 不管有没有删除最早的视频帧，都不可以复用的，因为插入的帧不是在最后面，还有<|vision_end|><|im_end|>
+            past_key_values, rope_deltas = None, None
+
+
             messages = []
             videos = []
             for msg, vid in historys:
@@ -197,7 +202,6 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
             )
             inputs = inputs.to("cuda")
 
-            nonlocal past_key_values, rope_deltas
 
             if past_key_values is None:
                 past_key_values = DynamicCache()
@@ -549,7 +553,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
 
 
 #换成和训练时一样的帧采样方式
-class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
+class EvalQWen2VLStreamV2Align(EvalQWen2VLStreamV2):
     def inference(
             self,
             video_file_name,

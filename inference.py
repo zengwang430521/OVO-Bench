@@ -63,10 +63,14 @@ elif args.model == "QWen2VLStream_7B_v2":
     from models.QWen2VL_Stream_v2 import EvalQWen2VLStreamV2
     assert os.path.exists(args.model_path)
     model = EvalQWen2VLStreamV2(args)
-elif args.model == "QWen2VLStream_7B_v3":
-    from models.QWen2VL_Stream_v2 import EvalQWen2VLStreamV3
+elif args.model == "QWen2VLStream_7B_v2_align":
+    from models.QWen2VL_Stream_v2 import EvalQWen2VLStreamV2Align
     assert os.path.exists(args.model_path)
-    model = EvalQWen2VLStreamV3(args)
+    model = EvalQWen2VLStreamV2Align(args)
+elif args.model == "QWen2VLStream_7B_v3_align":
+    from models.QWen2VL_Stream_v3 import EvalQWen2VLStreamV3Align
+    assert os.path.exists(args.model_path)
+    model = EvalQWen2VLStreamV3Align(args)
 else:
     raise ValueError(f"Unsupported model: {args.model}. Please implement the model.")
 
