@@ -194,7 +194,7 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
             stream_logits = output.stream_logits
             last_logits = stream_logits[0, judge_token_index]
             result = last_logits[1] > last_logits[0]
-            # import pdb; pdb.set_trace()
+            import pdb; pdb.set_trace()
             return result.item()
 
         def get_response():
