@@ -149,7 +149,7 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
             frame_times, frame_idxs = [], []
             for time_seg, frame_num in zip(video_time_segs, frame_nums):
                 t_start, t_end = time_seg
-                sample_times = np.linspace(t_start, t_end, frame_num, endpoint=False)
+                sample_times = np.linspace(t_start, t_end, frame_num+1)[1:]
                 sample_idxs = (sample_times * real_fps).round().astype(np.int32)
                 sample_idxs = sample_idxs.clip(min=0, max=total_frames - 1)
                 frame_idxs.append(sample_idxs)
