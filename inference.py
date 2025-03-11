@@ -55,6 +55,10 @@ elif args.model == "QWen2VL_7B_V2":
     from models.QWen2VL_v2 import EvalQWen2VL2
     assert os.path.exists(args.model_path)
     model = EvalQWen2VL2(args)
+elif args.model == "QWen2VL_7B_V3":
+    from models.QWen2VL_v3 import EvalQWen2VL3
+    assert os.path.exists(args.model_path)
+    model = EvalQWen2VL3(args)
 elif args.model == "QWen2VLStream_7B":
     from models.QWen2VL_Stream import EvalQWen2VLStream
     assert os.path.exists(args.model_path)
