@@ -214,39 +214,19 @@ class EvalQWen2VL3(OVOBenchOffline):
                 prompt = self.build_prompt(task=task, question=None, options=None, _anno_=_anno_, index=None)
                 try:
                     # 为了测试得快一点，只在几个时间点进行测试
-                    if task == 'CRR':
-                        # crr 只需要回复一次就可以了
-                        force_response, all_responses = self.inference(
-                            video,
-                            prompt,
-                            start_time=0,
-                            query_time=query_time,
-                            end_time=end_time,
-                            only_one_response=True,
-                            check_times=None if DENSE_TEST else test_times
-                        )
-                    else:
-                        force_response, all_responses = self.inference(
-                            video,
-                            prompt,
-                            start_time=0,
-                            query_time=query_time,
-                            end_time=end_time,
-                            only_one_response=False,
-                            check_times=None if DENSE_TEST else test_times
-                        )
+                    # crr 只需要回复一次就可以了
+                    force_response, all_responses = self.inference(
+                        video,
+                        prompt,
+                        start_time=0,
+                        query_time=query_time,
+                        end_time=end_time,
+                        only_one_response=(task == 'CRR'),
+                        check_times=None if DENSE_TEST else test_times,
+                        task=task)
                 except:
                     force_response, all_responses = None, None
-                    # import pdb; pdb.set_trace()
-                    # force_response, all_responses = self.inference(
-                    #     video,
-                    #     prompt,
-                    #     start_time=0,
-                    #     query_time=query_time,
-                    #     end_time=end_time,
-                    #     only_one_response=False,
-                    #     check_times=test_times
-                    # )
+
 
                 _anno_["force_response"] = force_response
                 _anno_["all_responses"] = all_responses
