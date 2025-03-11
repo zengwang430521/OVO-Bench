@@ -567,7 +567,8 @@ class EvalQWen2VLStreamV2Align(EvalQWen2VLStreamV2):
         # import pdb; pdb.set_trace()
 
         print(f"(Time: {query_time}) User:{prompt}")
-        print(check_times)
+        print(f'check times: {check_times}')
+
 
         video_token_id = 151656  # <|vision_pad|>
         end_token_id = 151645   # <|im_end|>
