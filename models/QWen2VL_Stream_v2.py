@@ -627,6 +627,7 @@ class EvalQWen2VLStreamV2Align(EvalQWen2VLStreamV2):
             return frames
 
         def get_videos():
+            import pdb; pdb.set_trace()
             video_time_segs = []
             for message in messages:
                 content = message["content"]
