@@ -564,7 +564,7 @@ class EvalQWen2VLStreamV2Align(EvalQWen2VLStreamV2):
             check_time_step=1.0,
             check_times=None,
             only_one_response=False):
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
         print(f"(Time: {query_time}) User:{prompt}")
         print(check_times)
@@ -651,7 +651,8 @@ class EvalQWen2VLStreamV2Align(EvalQWen2VLStreamV2):
                 # 先计算这一段需要采样多少帧
                 t_start, t_end = time_seg
                 seg_duration = t_end - t_start
-                frame_num = min(seg_duration * video_fps, seg_duration * real_fps)
+                # frame_num = min(seg_duration * video_fps, seg_duration * real_fps)
+                frame_num = min(video_maxlen, seg_duration * real_fps)  # 每次都采集满64帧
                 frame_num = min(frame_num, video_maxlen * seg_duration / total_duration)
                 frame_num = math.floor(frame_num)
                 frame_num = max(frame_num, 2)  # 最少采集2帧
