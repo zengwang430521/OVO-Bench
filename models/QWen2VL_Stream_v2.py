@@ -269,8 +269,12 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                 judge_token_index = last_vid_token_index
 
             stream_logits = output.stream_logits
-            last_logits = stream_logits[0, judge_token_index]
-            result = last_logits[1] > last_logits[0]
+            judge_logits = stream_logits[0, judge_token_index]
+            if self.args.stream_head_dim == 2:
+                judge_score = judge_logits[1] - judge_logits[0]
+            judge_score = judge_score.sigmoid()
+            result = judge_score >= self.args.stream_head_threshold
+
             # import pdb; pdb.set_trace()
             return result.item()
 
@@ -739,9 +743,12 @@ class EvalQWen2VLStreamV2Align(EvalQWen2VLStreamV2):
             else:
                 judge_token_index = last_vid_token_index
 
-            stream_logits = output.stream_logits
-            last_logits = stream_logits[0, judge_token_index]
-            result = last_logits[1] > last_logits[0]
+            judge_logits = stream_logits[0, judge_token_index]
+            if self.args.stream_head_dim == 2:
+                judge_score = judge_logits[1] - judge_logits[0]
+            judge_score = judge_score.sigmoid()
+            result = judge_score >= self.args.stream_head_threshold
+
             # import pdb; pdb.set_trace()
             return result.item()
         def get_response():
