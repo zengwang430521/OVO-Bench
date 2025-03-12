@@ -11,8 +11,14 @@ _CONFIG_FOR_DOC = "Qwen2VLConfig"
 class Qwen2VLStreamConfig(Qwen2VLConfig):
     model_type = "qwen2_vl_stream"
 
-    def __init__(self, stream_loss_factor=1.0, **kwargs):
+    def __init__(self,
+                 stream_head_dim=2,
+                 stream_loss_type=None,
+                 stream_loss_factor=1.0,
+                 **kwargs):
         super().__init__(**kwargs)
+        self.stream_head_dim = stream_head_dim
+        self.stream_loss_type = stream_loss_type
         self.stream_loss_factor = stream_loss_factor
 
 
