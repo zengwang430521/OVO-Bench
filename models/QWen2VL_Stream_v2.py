@@ -8,7 +8,7 @@ from tqdm import tqdm
 from qwen_vl_utils.vision_process import *
 import json
 import decord
-from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor, DynamicCache
+from transformers import Qwen2VLForConditionalGeneration, AutoTokenizer, AutoProcessor, DynamicCache, AutoConfig
 from qwen_vl_utils import process_vision_info, fetch_video
 import torch
 from .qwen2_vl_monkey_patch import Qwen2VLStream
@@ -22,6 +22,9 @@ import torch.nn as nn
 # DENSE_TEST = True
 # DENSE_TEST = False
 
+
+
+
 class EvalQWen2VLStreamV2(OVOBenchOffline):
     def __init__(self, args) -> None:
         super().__init__(args)
@@ -32,27 +35,21 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
         self.max_frame_num = 64
 
     def _model_init(self):
-        # import pdb;pdb.set_trace()
-        # print('Load model')
+        import pdb;pdb.set_trace()
+        print('Load model')
 
         model_path = self.args.model_path
+        config = AutoConfig.from_pretrained(model_args.model_name_or_path, **init_kwargs)
+        config.stream_head_dim = self.args.stream_head_dim
 
         model = Qwen2VLStream.from_pretrained(
-            model_path,
+            config=config,
+            pretrained_model_name_or_path=model_path,
             torch_dtype=torch.bfloat16,
             attn_implementation="flash_attention_2",
             device_map="auto",
         )
 
-        # 重新设置stream head
-        model.stream_head_dim = self.args.stream_head_dim
-        model.stream_loss_type = self.args.stream_loss_type
-        model.stream_loss_factor = self.args.stream_loss_factor
-        assert model.stream_head_dim in [1, 2]
-        if model.stream_head_dim == 2:
-            model.stream_head = nn.Linear(model.hidden_size, 2, bias=False)     # 二分类，回复/不回复
-        else:
-            model.stream_head = nn.Linear(model.hidden_size, 1, bias=True)     # 二分类，回复/不回复
 
         lora_path = self.args.lora_path
         if lora_path is not None:
