@@ -17,7 +17,7 @@ import argparse
 from peft import LoraConfig, LoraModel, PeftModel, TaskType, get_peft_model
 import os
 import textwrap
-
+import torch.nn as nn
 
 # DENSE_TEST = True
 # DENSE_TEST = False
@@ -36,7 +36,6 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
         # print('Load model')
 
         model_path = self.args.model_path
-        lora_path = self.args.lora_path
 
         model = Qwen2VLStream.from_pretrained(
             model_path,
@@ -45,6 +44,17 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
             device_map="auto",
         )
 
+        # 重新设置stream head
+        model.stream_head_dim = self.args.stream_head_dim
+        model.stream_loss_type = self.args.stream_loss_type
+        model.stream_loss_factor = self.args.stream_loss_factor
+        assert model.stream_head_dim in [1, 2]
+        if model.stream_head_dim == 2:
+            model.stream_head = nn.Linear(model.hidden_size, 2, bias=False)     # 二分类，回复/不回复
+        else:
+            model.stream_head = nn.Linear(model.hidden_size, 1, bias=True)     # 二分类，回复/不回复
+
+        lora_path = self.args.lora_path
         if lora_path is not None:
             # import pdb; pdb.set_trace()
             # print('Debug: load lora')
