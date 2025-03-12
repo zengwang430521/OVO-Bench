@@ -741,14 +741,17 @@ class EvalQWen2VLStreamV2Align(EvalQWen2VLStreamV2):
                 judge_token_index = last_vid_token_index
 
             import pdb; pdb.set_trace()
+            stream_logits = output.stream_logits
             judge_logits = stream_logits[0, judge_token_index]
             if self.args.stream_head_dim == 2:
-                judge_score = judge_logits[1] - judge_logits[0]
-            judge_score = judge_score.sigmoid()
+                judge_score = (judge_logits[1] - judge_logits[0]).sigmoid()
+            else:
+                judge_score = judge_logits.sigmoid()
             result = judge_score >= self.args.stream_head_threshold
 
             # import pdb; pdb.set_trace()
             return result.item()
+
         def get_response():
             nonlocal past_key_values, rope_deltas
 
