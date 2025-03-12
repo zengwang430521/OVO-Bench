@@ -222,8 +222,9 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
             stream_logits = output.stream_logits
             judge_logits = stream_logits[0, judge_token_index]
             if self.args.stream_head_dim == 2:
-                judge_score = judge_logits[1] - judge_logits[0]
-            judge_score = judge_score.sigmoid()
+                judge_score = (judge_logits[1] - judge_logits[0]).sigmoid()
+            else:
+                judge_score = judge_logits.sigmoid()
             result = judge_score >= self.args.stream_head_threshold
 
             return result.item()
@@ -495,8 +496,9 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
             stream_logits = output.stream_logits
             judge_logits = stream_logits[0, judge_token_index]
             if self.args.stream_head_dim == 2:
-                judge_score = judge_logits[1] - judge_logits[0]
-            judge_score = judge_score.sigmoid()
+                judge_score = (judge_logits[1] - judge_logits[0]).sigmoid()
+            else:
+                judge_score = judge_logits.sigmoid()
             result = judge_score >= self.args.stream_head_threshold
 
             # import pdb; pdb.set_trace()
