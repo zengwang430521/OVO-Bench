@@ -39,7 +39,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
         print('Load model')
 
         model_path = self.args.model_path
-        config = AutoConfig.from_pretrained(model_args.model_name_or_path, **init_kwargs)
+        config = AutoConfig.from_pretrained(model_path)
         config.stream_head_dim = self.args.stream_head_dim
 
         model = Qwen2VLStream.from_pretrained(
