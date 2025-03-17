@@ -37,6 +37,8 @@ class EvalQWen2VLStream(OVOBenchOffline):
         )
 
         if lora_path is not None:
+            import pdb; pdb.set_trace()
+            print('Debug: load lora!')
             model = PeftModel.from_pretrained(model, lora_path)
             model = model.merge_and_unload()
         model = model.eval()
