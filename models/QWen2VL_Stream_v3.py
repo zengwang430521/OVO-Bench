@@ -347,6 +347,23 @@ def regularize_images_shape(image_shapes, image_resolution):
     return output_shapes
 
 
+def _preprocess_image(self, image: "ImageObject", **kwargs) -> "ImageObject":
+    image = super()._preprocess_image(image, **kwargs)
+    if min(image.width, image.height) < 28:
+        width, height = max(image.width, 28), max(image.height, 28)
+        image = image.resize((width, height), resample=Image.NEAREST)
+
+    if image.width / image.height > 200:
+        width, height = image.height * 180, image.height
+        image = image.resize((width, height), resample=Image.NEAREST)
+
+    if image.height / image.width > 200:
+        width, height = image.width, image.width * 180
+        image = image.resize((width, height), resample=Image.NEAREST)
+
+    return image
+
+
 def _regularize_images(images: Sequence["ImageInput"], **kwargs) -> List["ImageObject"]:
     r"""
     Regularizes images to avoid error. Including reading and pre-processing.
@@ -368,6 +385,33 @@ def _regularize_images(images: Sequence["ImageInput"], **kwargs) -> List["ImageO
 
         results.append(_preprocess_image(image, **kwargs))
 
+    return results
+
+
+def _regularize_videos(
+        videos: Sequence["VideoInput"],
+        video_sample_idxs: Sequence["List"],
+        **kwargs) -> List[List["ImageObject"]]:
+
+    results = []
+    for video, sample_indices_seg in zip(videos, video_sample_idxs):
+        # 新的代码
+        try:
+            vr = decord.VideoReader(video)
+            frames = vr.get_batch(sample_indices_seg).asnumpy()
+            frames = [Image.fromarray(frame) for frame in frames]
+        except:
+            # 旧版本代码，可能很慢
+            container = av.open(video, "r")
+            video_stream = next(stream for stream in container.streams if stream.type == "video")
+            frames: List["ImageObject"] = []
+            container.seek(0)
+            for frame_idx, frame in enumerate(container.decode(video_stream)):
+                if frame_idx in sample_indices_seg:
+                    frames.append(frame.to_image())
+
+        frames = _regularize_images(frames, **kwargs)
+        results.append(frames)
     return results
 
 
@@ -408,13 +452,6 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
 
         messages.append({"role": "user", "content": prompt, "time": [query_time, query_time]})
         cur_time = query_time
-
-        def get_frames(frame_idxs):
-            frames = vr.get_batch(frame_idxs).asnumpy()
-            frames = [Image.fromarray(frame) for frame in frames]
-            frames = _regularize_images(frames, image_resolution=65536)
-            frames = self.processor([frames], return_tensors="pt")
-            return frames
 
         def get_frames_0(frame_idxs):
             frames = vr.get_batch(frame_idxs).asnumpy()
@@ -520,7 +557,16 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
             # 采样
             videos = []
             for sample_idxs in frame_idxs:
-                videos.append(get_frames(sample_idxs))
+                # videos.append(get_frames(sample_idxs))
+                import pdb; pdb.set_trace()
+                videos = _regularize_videos(
+                    [video_file_name]* len(sample_idxs),
+                    video_sample_idxs=sample_idxs,
+                    image_resolution=65536,
+                    video_fps=2.0,
+                    video_maxlen=64
+                )
+
             return videos
 
         past_key_values, rope_deltas = None, None
