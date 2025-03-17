@@ -347,8 +347,23 @@ def regularize_images_shape(image_shapes, image_resolution):
     return output_shapes
 
 
+def _preprocess_image_base(self, image: "ImageObject", **kwargs) -> "ImageObject":
+    r"""
+    Pre-processes a single image.
+    """
+    image_resolution: int = kwargs.get("image_resolution")
+    if (image.width * image.height) > image_resolution:
+        resize_factor = math.sqrt(image_resolution / (image.width * image.height))
+        width, height = int(image.width * resize_factor), int(image.height * resize_factor)
+        image = image.resize((width, height), resample=Image.NEAREST)
+
+    if image.mode != "RGB":
+        image = image.convert("RGB")
+
+    return image
+
 def _preprocess_image(self, image: "ImageObject", **kwargs) -> "ImageObject":
-    image = super()._preprocess_image(image, **kwargs)
+    image = _preprocess_image_base(image, **kwargs)
     if min(image.width, image.height) < 28:
         width, height = max(image.width, 28), max(image.height, 28)
         image = image.resize((width, height), resample=Image.NEAREST)
