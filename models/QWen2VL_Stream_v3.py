@@ -347,7 +347,7 @@ def regularize_images_shape(image_shapes, image_resolution):
     return output_shapes
 
 
-def _preprocess_image_base(self, image: "ImageObject", **kwargs) -> "ImageObject":
+def _preprocess_image_base(image: "ImageObject", **kwargs) -> "ImageObject":
     r"""
     Pre-processes a single image.
     """
@@ -362,7 +362,7 @@ def _preprocess_image_base(self, image: "ImageObject", **kwargs) -> "ImageObject
 
     return image
 
-def _preprocess_image(self, image: "ImageObject", **kwargs) -> "ImageObject":
+def _preprocess_image(image: "ImageObject", **kwargs) -> "ImageObject":
     image = _preprocess_image_base(image, **kwargs)
     if min(image.width, image.height) < 28:
         width, height = max(image.width, 28), max(image.height, 28)
