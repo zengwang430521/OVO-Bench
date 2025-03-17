@@ -77,7 +77,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
             check_time_step=1.0,
             check_times=None,
             only_one_response=False):
-        # import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
 
         print(f"(Time: {query_time}) User:{prompt}")
         video_token_id = 151656  # <|vision_pad|>
