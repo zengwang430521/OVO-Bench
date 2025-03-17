@@ -413,7 +413,7 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
             frames = vr.get_batch(frame_idxs).asnumpy()
             frames = [Image.fromarray(frame) for frame in frames]
             frames = _regularize_images(frames, image_resolution=65536)
-            frames = video_processor([frames], return_tensors="pt")
+            frames = self.processor([frames], return_tensors="pt")
             return frames
 
         def get_frames_0(frame_idxs):
