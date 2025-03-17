@@ -334,15 +334,15 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
             check_time_step=1.0,
             check_times=None,
             only_one_response=False):
-        # import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
 
         print(f"(Time: {query_time}) User:{prompt}")
         print(f'check times: {check_times}')
 
-        video_token_id = 151656  # <|vision_pad|>
+        # video_token_id = 151656  # <|vision_pad|>
         end_token_id = 151645  # <|im_end|>
 
-        ele = {"type": "video", "video": video_file_name, "nframes": 64}
+        ele = {"type": "video", "video": video_file_name, "nframes": 64, "max_pixels": 65536}
 
         # 视频对象
         vr = decord.VideoReader(video_file_name)
@@ -371,7 +371,6 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
                 total_pixels = ele.get("total_pixels", VIDEO_TOTAL_PIXELS)
                 max_pixels = max(min(VIDEO_MAX_PIXELS, total_pixels / nframes * FRAME_FACTOR), int(min_pixels * 1.05))
                 max_pixels = ele.get("max_pixels", max_pixels)
-                max_pixels = 65536
                 if "resized_height" in ele and "resized_width" in ele:
                     resized_height, resized_width = smart_resize(
                         ele["resized_height"],
