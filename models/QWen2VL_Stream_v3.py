@@ -623,7 +623,7 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
                 judge_score = judge_logits.sigmoid()
             result = judge_score >= self.args.stream_head_threshold
 
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             return result.item()
 
         def get_response():
