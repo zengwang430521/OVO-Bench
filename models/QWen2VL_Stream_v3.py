@@ -442,7 +442,7 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
             check_times=None,
             only_one_response=False):
 
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
         print(f"(Time: {query_time}) User:{prompt}")
         print(f'check times: {check_times}')
