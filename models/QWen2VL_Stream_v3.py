@@ -364,7 +364,7 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
         # video_token_id = 151656  # <|vision_pad|>
         end_token_id = 151645  # <|im_end|>
 
-        ele = {"type": "video", "video": video_file_name, "nframes": 64}
+        ele = {"type": "video", "video": video_file_name, "nframes": 64, 'min_pixels': 3136, "max_pixels": 12845056}
 
         # 视频对象
         vr = decord.VideoReader(video_file_name)
@@ -402,7 +402,7 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
                 else:
                     import pdb; pdb.set_trace()
 
-                    sample_frame_shapes = [(width, height)] * len(nframes)
+                    sample_frame_shapes = [(width, height)] * nframes
                     sample_frame_shapes = regularize_images_shape(sample_frame_shapes, 65536)
                     new_width, new_height = sample_frame_shapes[0]
                     resized_height, resized_width = smart_resize(
