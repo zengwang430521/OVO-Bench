@@ -574,7 +574,6 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
             # for sample_idxs in frame_idxs:
             #     videos.append(get_frames(sample_idxs))
 
-            import pdb; pdb.set_trace()
             videos = _regularize_videos(
                 [video_file_name] * len(frame_idxs),
                 video_sample_idxs=frame_idxs,
@@ -624,7 +623,7 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
                 judge_score = judge_logits.sigmoid()
             result = judge_score >= self.args.stream_head_threshold
 
-            # import pdb; pdb.set_trace()
+            import pdb; pdb.set_trace()
             return result.item()
 
         def get_response():
