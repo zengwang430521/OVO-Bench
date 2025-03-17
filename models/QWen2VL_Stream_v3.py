@@ -458,6 +458,7 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
         frame_time_step = 1.0 / self.fps
         end_time = min((total_frames - 1) / real_fps, end_time)
         resized_height, resized_width = None, None
+        del vr
 
         messages = []
         system_prompt = "You are a helpful assistant."
@@ -575,7 +576,7 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
                 # videos.append(get_frames(sample_idxs))
                 import pdb; pdb.set_trace()
                 videos = _regularize_videos(
-                    [video_file_name]* len(sample_idxs),
+                    [video_file_name] * len(sample_idxs),
                     video_sample_idxs=sample_idxs,
                     image_resolution=65536,
                     video_fps=2.0,
