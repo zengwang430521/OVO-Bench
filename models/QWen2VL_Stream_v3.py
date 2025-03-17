@@ -18,7 +18,9 @@ from peft import LoraConfig, LoraModel, PeftModel, TaskType, get_peft_model
 import os
 import textwrap
 from .QWen2VL_Stream_v2 import EvalQWen2VLStreamV2
-
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
+from PIL import Image
+from PIL.Image import Image as ImageObject
 
 class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
 
@@ -345,6 +347,30 @@ def regularize_images_shape(image_shapes, image_resolution):
     return output_shapes
 
 
+def _regularize_images(images: Sequence["ImageInput"], **kwargs) -> List["ImageObject"]:
+    r"""
+    Regularizes images to avoid error. Including reading and pre-processing.
+    """
+    results = []
+    for image in images:
+        if isinstance(image, str):
+            image = Image.open(image)
+        elif isinstance(image, bytes):
+            image = Image.open(BytesIO(image))
+        elif isinstance(image, dict):
+            if image["bytes"] is not None:
+                image = Image.open(BytesIO(image["bytes"]))
+            else:
+                image = Image.open(image["path"])
+
+        if not isinstance(image, ImageObject):
+            raise ValueError(f"Expect input is a list of Images, but got {type(image)}.")
+
+        results.append(_preprocess_image(image, **kwargs))
+
+    return results
+
+
 class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
     def inference(
             self,
@@ -385,6 +411,13 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
 
         def get_frames(frame_idxs):
             frames = vr.get_batch(frame_idxs).asnumpy()
+            frames = [Image.fromarray(frame) for frame in frames]
+            frames = _regularize_images(frames, image_resolution=65536)
+            frames = video_processor([frames], return_tensors="pt")
+            return frames
+
+        def get_frames_0(frame_idxs):
+            frames = vr.get_batch(frame_idxs).asnumpy()
             frames = torch.tensor(frames).permute(0, 3, 1, 2).cuda()  # Convert to TCHW format
             nonlocal resized_height, resized_width
             if resized_height is None or resized_width is None:
@@ -419,7 +452,6 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
                 antialias=True,
             ).float()
             # import pdb; pdb.set_trace()
-            # frames = list(torch.split(frames, 1, dim=0))  # 分成list便于处理
             return frames
 
         def get_videos():
@@ -494,7 +526,7 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
         past_key_values, rope_deltas = None, None
 
         def need_response():
-            # import pdb; pdb.set_trace()
+            import pdb; pdb.set_trace()
             nonlocal past_key_values, rope_deltas
             past_key_values, rope_deltas = None, None
 
