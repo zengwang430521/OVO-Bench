@@ -323,6 +323,28 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
         return force_response, all_responses
 
 
+
+def regularize_images_shape(image_shapes, image_resolution):
+    output_shapes = []
+    for width, height in image_shapes:
+        if (width * height) > image_resolution:
+            resize_factor = math.sqrt(image_resolution / (width * height))
+            width, height = int(width * resize_factor), int(height * resize_factor)
+
+        if min(width, height) < 28:
+            width, height = max(width, 28), max(height, 28)
+
+        if width / height > 200:
+            width, height = height * 180, height
+
+        if height / width > 200:
+            width, height = width, width * 180
+
+        output_shapes.append((width, height))
+
+    return output_shapes
+
+
 class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
     def inference(
             self,
@@ -342,7 +364,7 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
         # video_token_id = 151656  # <|vision_pad|>
         end_token_id = 151645  # <|im_end|>
 
-        ele = {"type": "video", "video": video_file_name, "nframes": 64, "max_pixels": 65536}
+        ele = {"type": "video", "video": video_file_name, "nframes": 64}
 
         # 视频对象
         vr = decord.VideoReader(video_file_name)
@@ -378,9 +400,14 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
                         factor=IMAGE_FACTOR,
                     )
                 else:
+                    import pdb; pdb.set_trace()
+
+                    sample_frame_shapes = [(width, height)] * len(nframes)
+                    sample_frame_shapes = regularize_images_shape(sample_frame_shapes, 65536)
+                    new_width, new_height = sample_frame_shapes[0]
                     resized_height, resized_width = smart_resize(
-                        height,
-                        width,
+                        new_height,
+                        new_width,
                         factor=IMAGE_FACTOR,
                         min_pixels=min_pixels,
                         max_pixels=max_pixels,
