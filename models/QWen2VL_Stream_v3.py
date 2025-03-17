@@ -63,6 +63,7 @@ class EvalQWen2VLStreamV3(EvalQWen2VLStreamV2):
                 total_pixels = ele.get("total_pixels", VIDEO_TOTAL_PIXELS)
                 max_pixels = max(min(VIDEO_MAX_PIXELS, total_pixels / nframes * FRAME_FACTOR), int(min_pixels * 1.05))
                 max_pixels = ele.get("max_pixels", max_pixels)
+                max_pixels = 65536
                 if "resized_height" in ele and "resized_width" in ele:
                     resized_height, resized_width = smart_resize(
                         ele["resized_height"],
@@ -421,8 +422,10 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
                 # 先计算这一段需要采样多少帧
                 t_start, t_end = time_seg
                 seg_duration = t_end - t_start
-                # frame_num = min(seg_duration * video_fps, seg_duration * real_fps)
-                frame_num = min(video_maxlen, seg_duration * real_fps)  # 每次都采集满64帧
+
+                frame_num = min(seg_duration * video_fps, seg_duration * real_fps)
+                # frame_num = min(video_maxlen, seg_duration * real_fps)  # 每次都采集满64帧
+
                 frame_num = min(frame_num, video_maxlen * seg_duration / total_duration)
                 frame_num = math.floor(frame_num)
                 frame_num = max(frame_num, 2)  # 最少采集2帧
