@@ -356,7 +356,8 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
             check_time_step=1.0,
             check_times=None,
             only_one_response=False):
-        import pdb; pdb.set_trace()
+
+        # import pdb; pdb.set_trace()
 
         print(f"(Time: {query_time}) User:{prompt}")
         print(f'check times: {check_times}')
@@ -400,8 +401,6 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
                         factor=IMAGE_FACTOR,
                     )
                 else:
-                    import pdb; pdb.set_trace()
-
                     sample_frame_shapes = [(width, height)] * nframes
                     sample_frame_shapes = regularize_images_shape(sample_frame_shapes, 65536)
                     new_width, new_height = sample_frame_shapes[0]
@@ -495,7 +494,7 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
         past_key_values, rope_deltas = None, None
 
         def need_response():
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             nonlocal past_key_values, rope_deltas
             past_key_values, rope_deltas = None, None
 
