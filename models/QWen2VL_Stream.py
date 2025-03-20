@@ -172,7 +172,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
             text_historys.append({"role": "assistant", "content": force_response})
             print(f"(Time: {cur_time}) Assistant:{force_response}")
         else:
-            print(f"(Time: {cur_time})")
+            print(f"(Time: {cur_time}) None")
 
         # stream 循环处理
         cur_time += frame_time_step
@@ -204,7 +204,7 @@ class EvalQWen2VLStream(OVOBenchOffline):
                     if not only_one_response:
                         # only_one_response 模式下，加入None会让推理提前停止
                         all_responses.append((cur_time, None))
-                    print(f"(Time: {cur_time})")
+                    print(f"(Time: {cur_time}) None")
 
                 check_time += check_time_step
             cur_time += frame_time_step

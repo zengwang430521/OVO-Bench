@@ -320,7 +320,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
             historys.append([video_message, []])
             print(f"(Time: {cur_time}) Assistant:{force_response}")
         else:
-            print(f"(Time: {cur_time})")
+            print(f"(Time: {cur_time}) None")
 
         # stream 循环处理
         if check_times is None:
@@ -363,7 +363,7 @@ class EvalQWen2VLStreamV2(OVOBenchOffline):
                     # only_one_response 模式下，加入None会让推理提前停止
                     all_responses.append((cur_time, None))
                 # historys.append([video_message, []])
-                print(f"(Time: {cur_time})")
+                print(f"(Time: {cur_time}) None")
 
             cur_time = new_sample_times[-1]
             del check_times[0]
@@ -792,7 +792,7 @@ class EvalQWen2VLStreamV2Align(EvalQWen2VLStreamV2):
                 messages.append({"role": "assistant", "content": force_response, "time": [cur_time, cur_time]})
                 print(f"(Time: {cur_time}) Assistant:{force_response}")
             else:
-                print(f"(Time: {cur_time})")
+                print(f"(Time: {cur_time}) None")
 
 
         # stream 循环处理
@@ -830,6 +830,6 @@ class EvalQWen2VLStreamV2Align(EvalQWen2VLStreamV2):
                 if not only_one_response:
                     # only_one_response 模式下，加入None会让推理提前停止
                     all_responses.append((cur_time, None))
-                print(f"(Time: {cur_time})")
+                print(f"(Time: {cur_time}) None")
 
         return force_response, all_responses

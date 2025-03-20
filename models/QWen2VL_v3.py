@@ -376,7 +376,7 @@ class EvalQWen2VL3(OVOBenchOffline):
                 all_responses.append((cur_time, force_response))
                 print(f"(Time: {cur_time}) Assistant:{force_response}")
             else:
-                print(f"(Time: {cur_time})")
+                print(f"(Time: {cur_time}) None")
 
         # stream 循环处理
         if check_times is None:
@@ -407,7 +407,7 @@ class EvalQWen2VL3(OVOBenchOffline):
                 if not only_one_response:
                     # only_one_response 模式下，加入None会让推理提前停止
                     all_responses.append((cur_time, None))
-                print(f"(Time: {cur_time})")
+                print(f"(Time: {cur_time}) None")
         return force_response, all_responses
 
 
