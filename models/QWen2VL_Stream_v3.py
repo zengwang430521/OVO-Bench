@@ -727,7 +727,7 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
         # video_token_id = 151656  # <|vision_pad|>
         end_token_id = 151645  # <|im_end|>
 
-        ele = {"type": "video", "video": video_file_name, "nframes": 64, 'min_pixels': 3136, "max_pixels": 12845056}
+        ele = {"type": "video", "video": video_file_name, "nframes": 64}
 
         # 视频对象
         vr = decord.VideoReader(video_file_name)
