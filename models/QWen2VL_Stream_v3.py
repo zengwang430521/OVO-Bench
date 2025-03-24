@@ -577,7 +577,7 @@ class EvalQWen2VLStreamV3Train(EvalQWen2VLStreamV2):
             videos = _regularize_videos(
                 [video_file_name] * len(frame_idxs),
                 video_sample_idxs=frame_idxs,
-                image_resolution=65536,
+                image_resolution=100352,
                 video_fps=2.0,
                 video_maxlen=64
             )
