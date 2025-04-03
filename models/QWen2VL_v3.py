@@ -316,7 +316,7 @@ class EvalQWen2VL3(OVOBenchOffline):
             task=None,
     ):
 
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
         print(f"(Time: {query_time}) User:{prompt}")
         print(f'check_times: {check_times}')
