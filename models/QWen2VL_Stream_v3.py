@@ -429,7 +429,7 @@ def _regularize_videos(
         results.append(frames)
     return results
 
-
+'''和训练对齐'''
 class EvalQWen2VLStreamV3Train(EvalQWen2VLStreamV2):
     def inference(
             self,
@@ -706,7 +706,7 @@ class EvalQWen2VLStreamV3Train(EvalQWen2VLStreamV2):
         return force_response, all_responses
 
 
-
+'''永远64帧'''
 class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
     def inference(
             self,
@@ -964,6 +964,424 @@ class EvalQWen2VLStreamV3Align(EvalQWen2VLStreamV2):
             flag = need_response()
             if flag:
                 response = get_response()
+                all_responses.append((cur_time, response))
+                messages.append({"role": "assistant", "content": response, "time": [cur_time, cur_time]})
+                last_time = cur_time
+                print(f"(Time: {cur_time}) Assistant:{response}")
+            else:
+                if not only_one_response:
+                    # only_one_response 模式下，加入None会让推理提前停止
+                    all_responses.append((cur_time, None))
+                print(f"(Time: {cur_time}) None")
+
+        return force_response, all_responses
+
+
+import re
+
+def extract_first_number(s):
+    match = re.search(r'\d+', s)
+    if match:
+        return int(match.group())
+    return None  #
+class EvalQWen2VLStreamV3Baseline(EvalQWen2VLStreamV2):
+    '''为了测试baseline'''
+    def eval(self, anno, task_list, mode="offline"):
+        # import pdb; pdb.set_trace()
+        DENSE_TEST = self.args.dense
+
+        # Inference
+        if len(anno["backward"]) > 0:
+            backward_results = []
+            for _anno_ in tqdm(anno["backward"], desc="Backward Tasks"):
+                id = _anno_["id"]
+                video = _anno_["video"]
+                task = _anno_["task"]
+                question = _anno_["question"]
+                options = _anno_["options"]
+                realtime = _anno_["realtime"]
+                assert not question == None
+                assert not options == None
+                prompt = self.build_prompt(task=task, question=question, options=options, _anno_=None, index=None)
+                try:
+                    # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
+                    # response = self.inference(chunk_video_path, prompt)
+                    force_response, all_responses = self.inference(
+                        video, prompt, start_time=0, query_time=realtime,
+                        end_time=realtime + 3, only_one_response=True, task=task)
+                except Exception as e:
+                    print(f"Error during inference: {e}")
+                    force_response, all_responses = None, None
+
+                result = {
+                    "id": id,
+                    "video": video,
+                    "task": task,
+                    "question": question,
+                    # "response": response,
+                    "force_response": force_response,
+                    "all_responses": all_responses,
+                    "ground_truth": chr(65 + _anno_["gt"])
+                }
+                backward_results.append(result)
+
+        if len(anno["realtime"]) > 0:
+            realtime_results = []
+            for _anno_ in tqdm(anno["realtime"], desc="Realtime Tasks"):
+                id = _anno_["id"]
+                video = _anno_["video"]
+                task = _anno_["task"]
+                question = _anno_["question"]
+                options = _anno_["options"]
+                realtime = _anno_["realtime"]
+                assert not question == None
+                assert not options == None
+                prompt = self.build_prompt(task=task, question=question, options=options, _anno_=None, index=None)
+                try:
+                    # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
+                    # response = self.inference(chunk_video_path, prompt)
+                    # response = self.inference(video, prompt, start_time=0, end_time=realtime)
+                    force_response, all_responses = self.inference(
+                        video, prompt, start_time=0, query_time=realtime,
+                        end_time=realtime + 3, only_one_response=True, task=task)
+                except Exception as e:
+                    print(f"Error during inference: {e}")
+                    force_response, all_responses = None, None
+
+                result = {
+                    "id": id,
+                    "video": video,
+                    "task": task,
+                    "question": question,
+                    # "response": response,
+                    "force_response": force_response,
+                    "all_responses": all_responses,
+                    "ground_truth": chr(65 + _anno_["gt"])
+                }
+                realtime_results.append(result)
+
+        if len(anno["forward"]) > 0:
+            forward_results = []
+            for _anno_ in tqdm(anno["forward"], desc="Forward Tasks"):
+                id = _anno_["id"]
+                video = _anno_["video"]
+                task = _anno_["task"]
+                # test_info = _anno_["test_info"]
+
+                test_times = [t["realtime"] for t in _anno_['test_info']]
+                test_times = sorted(list(set(test_times)))
+                end_time = max(test_times) + 3
+
+                query_time = max(min(test_times) - 1, 0)
+                if "ask_time" in _anno_.keys():
+                    query_time = min(_anno_["ask_time"], query_time)
+                elif "start_times" in _anno_.keys():
+                    query_time = min(max(_anno_["start_times"][0] - 1, 0), query_time)
+                elif "start_time" in _anno_.keys():
+                    query_time = min(max(_anno_["start_time"][0] - 1, 0), query_time)
+
+
+                prompt = self.build_prompt(task=task, question=None, options=None, _anno_=_anno_, index=None)
+                try:
+                    # 为了测试得快一点，只在几个时间点进行测试
+                    if task == 'CRR':
+                        # crr 只需要回复一次就可以了
+                        force_response, all_responses = self.inference(
+                            video,
+                            prompt,
+                            start_time=0,
+                            query_time=query_time,
+                            end_time=end_time,
+                            only_one_response=True,
+                            check_times=None if DENSE_TEST else test_times,
+                            task=task
+                        )
+                    else:
+                        force_response, all_responses = self.inference(
+                            video,
+                            prompt,
+                            start_time=0,
+                            query_time=query_time,
+                            end_time=end_time,
+                            only_one_response=False,
+                            check_times=None if DENSE_TEST else test_times,
+                            task=task
+                        )
+                except:
+                    force_response, all_responses = None, None
+                    # import pdb; pdb.set_trace()
+                    # force_response, all_responses = self.inference(
+                    #     video,
+                    #     prompt,
+                    #     start_time=0,
+                    #     query_time=query_time,
+                    #     end_time=end_time,
+                    #     only_one_response=False,
+                    #     check_times=test_times
+                    # )
+
+                _anno_["force_response"] = force_response
+                _anno_["all_responses"] = all_responses
+                forward_results.append(_anno_)
+
+        # Calculate Score
+        if len(anno["backward"]) == 0:
+            backward_results = []
+        if len(anno["realtime"]) == 0:
+            realtime_results = []
+        if len(anno["forward"]) == 0:
+            forward_results = []
+
+        # Save Results
+        if self.args.save_results:
+            os.makedirs(f"{self.args.result_dir}/{self.args.model}", exist_ok=True)
+            with open(f"{self.args.result_dir}/{self.args.model}/{self.args.model}_{'_'.join(task_list)}_{mode}_1.json",
+                      "w") as f:
+                json.dump({
+                    "backward": backward_results,
+                    "realtime": realtime_results,
+                    "forward": forward_results
+                }, f, indent=4)
+
+
+    def inference(
+            self,
+            video_file_name,
+            prompt,
+            query_time,
+            start_time,
+            end_time,
+            check_time_step=1.0,
+            check_times=None,
+            only_one_response=False,
+            task=None,
+    ):
+
+        import pdb; pdb.set_trace()
+        print('Debug: EvalQWen2VLStreamV3Baseline Inference')
+
+        print(f"(Time: {query_time}) User:{prompt}")
+        print(f'check times: {check_times}')
+
+        # video_token_id = 151656  # <|vision_pad|>
+        end_token_id = 151645  # <|im_end|>
+
+        ele = {"type": "video", "video": video_file_name, "nframes": 64}
+
+        # 视频对象
+        vr = decord.VideoReader(video_file_name)
+        total_frames, real_fps = len(vr), vr.get_avg_fps()
+        frame_time_step = 1.0 / self.fps
+        end_time = min((total_frames - 1) / real_fps, end_time)
+        resized_height, resized_width = None, None
+
+        messages = []
+        system_prompt = "You are a helpful assistant."
+        messages.append({"role": "system", "content": system_prompt, 'time': [0, 0]})
+        if query_time > 0:
+            messages.append({"role": "user", "content": [ele, {"type": "text", "text": ""}], "time": [0, query_time]})
+
+        messages.append({"role": "user", "content": prompt, "time": [query_time, query_time]})
+        cur_time = query_time
+
+        def get_frames(frame_idxs):
+            frames = vr.get_batch(frame_idxs).asnumpy()
+            frames = torch.tensor(frames).permute(0, 3, 1, 2).cuda()  # Convert to TCHW format
+            nonlocal resized_height, resized_width
+            if resized_height is None or resized_width is None:
+                # resize params
+                nframes, _, height, width = frames.shape
+                min_pixels = ele.get("min_pixels", VIDEO_MIN_PIXELS)
+                total_pixels = ele.get("total_pixels", VIDEO_TOTAL_PIXELS)
+                max_pixels = max(min(VIDEO_MAX_PIXELS, total_pixels / nframes * FRAME_FACTOR), int(min_pixels * 1.05))
+                max_pixels = ele.get("max_pixels", max_pixels)
+                if "resized_height" in ele and "resized_width" in ele:
+                    resized_height, resized_width = smart_resize(
+                        ele["resized_height"],
+                        ele["resized_width"],
+                        factor=IMAGE_FACTOR,
+                    )
+                else:
+                    sample_frame_shapes = [(width, height)] * nframes
+                    sample_frame_shapes = regularize_images_shape(sample_frame_shapes, 65536)
+                    new_width, new_height = sample_frame_shapes[0]
+                    resized_height, resized_width = smart_resize(
+                        new_height,
+                        new_width,
+                        factor=IMAGE_FACTOR,
+                        min_pixels=min_pixels,
+                        max_pixels=max_pixels,
+                    )
+
+            frames = transforms.functional.resize(
+                frames,
+                [resized_height, resized_width],
+                interpolation=InterpolationMode.BICUBIC,
+                antialias=True,
+            ).float()
+            # import pdb; pdb.set_trace()
+            return frames
+
+        def get_videos():
+            video_time_segs = []
+            for message in messages:
+                content = message["content"]
+                if isinstance(content, list):
+                    time = message['time']
+                    for i in range(0, len(time), 2):
+                        video_time_segs.append([time[i], time[i + 1]])
+
+            # 先处理一下time_seg
+            total_duration = 0
+            for i in range(len(video_time_segs)):
+                video_duration = (total_frames - 1) / real_fps
+                t_start, t_end = video_time_segs[i]
+                t_start, t_end = max(t_start, 0), min(t_end, video_duration)
+                total_duration += t_end - t_start
+                video_time_segs[i] = [t_start, t_end]
+            video_fps, video_maxlen = 2.0, 64
+
+            # 给每段分配帧数
+            frame_nums = []
+            for time_seg in video_time_segs:
+                # 先计算这一段需要采样多少帧
+                t_start, t_end = time_seg
+                seg_duration = t_end - t_start
+
+                # frame_num = min(seg_duration * video_fps, seg_duration * real_fps)
+                frame_num = min(video_maxlen, seg_duration * real_fps)  # 每次都采集满64帧
+
+                frame_num = min(frame_num, video_maxlen * seg_duration / total_duration)
+                frame_num = math.floor(frame_num)
+                frame_num = max(frame_num, 2)  # 最少采集2帧
+                if frame_num % 2 != 0:
+                    # 必须是偶数
+                    frame_num -= 1
+                frame_nums.append(frame_num)
+
+            # 此时各段的采样帧数可能加起来超过 video_maxlen
+            current_total = sum(frame_nums)
+            # 如果超过，则对各段进行迭代调整，每次从那些帧数大于2的段减少2帧，直到总数不超过总数要求
+            while current_total > video_maxlen:
+                reduced = False
+                for i in range(len(frame_nums)):
+                    if frame_nums[i] > 2:
+                        frame_nums[i] -= 2
+                        current_total -= 2
+                        reduced = True
+                        if current_total <= video_maxlen:
+                            break
+                if not reduced:
+                    # 如果所有段都已经是2帧，无法再减少，则退出循环
+                    break
+
+            # 确定采样的frame idx
+            frame_times, frame_idxs = [], []
+            for time_seg, frame_num in zip(video_time_segs, frame_nums):
+                t_start, t_end = time_seg
+                sample_times = np.linspace(t_start, t_end, frame_num + 1)[1:]
+                sample_idxs = (sample_times * real_fps).round().astype(np.int32)
+                sample_idxs = sample_idxs.clip(min=0, max=total_frames - 1)
+                frame_idxs.append(sample_idxs)
+                frame_times.append(sample_times)
+
+            # 采样
+            videos = []
+            for sample_idxs in frame_idxs:
+                videos.append(get_frames(sample_idxs))
+            return videos
+
+        past_key_values, rope_deltas = None, None
+
+
+        def get_response():
+            nonlocal past_key_values, rope_deltas
+            text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+            inputs = self.processor(text=[text], images=None, videos=videos, padding=True, return_tensors="pt")
+            inputs = inputs.to("cuda")
+
+            # import pdb; pdb.set_trace()
+            if past_key_values is not None:
+                inputs['past_key_values'] = past_key_values
+                inputs['rope_deltas'] = rope_deltas
+                generated_ids = self.model.generate(**inputs, **self.sampling_params, use_cache=True)
+            else:
+                generated_ids = self.model.generate(**inputs, **self.sampling_params)
+
+            generated_ids_trimmed = [
+                out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+            ]
+            output_text = self.processor.batch_decode(
+                generated_ids_trimmed,
+                skip_special_tokens=True,
+                clean_up_tokenization_spaces=False
+            )
+            output_text = output_text[0]
+
+            return output_text
+
+
+
+        # 先在 query time 强制回答一次
+        all_responses = []
+        force_response = None
+        last_num = 0
+
+        def need_response():
+            nonlocal last_num
+            if task == 'CRR':
+                flag = 'no' not in response.lower()
+            elif task == 'REC':
+                cur_num = extract_first_number(response)
+                flag = (cur_num != last_num)
+                last_num = cur_num
+            else:
+                flag = True
+            return flag
+
+        if query_time > 0:
+            videos = get_videos()
+            response = get_response()
+            force_response = response
+            flag = need_response()
+
+            if flag:
+                all_responses.append((cur_time, force_response))
+                messages.append({"role": "assistant", "content": force_response, "time": [cur_time, cur_time]})
+                print(f"(Time: {cur_time}) Assistant:{force_response}")
+            else:
+                print(f"(Time: {cur_time}) None")
+                if not only_one_response:
+                    # only_one_response 模式下，加入None会让推理提前停止
+                    all_responses.append((cur_time, None))
+
+        if check_times is None:
+            check_times = []
+            t = query_time + check_time_step
+            while t <= end_time:
+                check_times.append(t)
+                t += check_time_step
+        check_times = [min(t, end_time) for t in check_times]
+        check_times = sorted(check_times)
+
+        last_time = cur_time
+
+        for cur_time in check_times:
+            # import pdb; pdb.set_trace()
+            if only_one_response and len(all_responses) > 0:
+                break
+
+            if isinstance(messages[-1]["content"], list):
+                messages[-1]['time'] = [last_time, cur_time]
+            else:
+                messages.append(
+                    {"role": "user", "content": [ele, {"type": "text", "text": ""}], "time": [last_time, cur_time]})
+
+            videos = get_videos()
+            response = get_response()
+            flag = need_response()
+
+            if flag:
                 all_responses.append((cur_time, response))
                 messages.append({"role": "assistant", "content": response, "time": [cur_time, cur_time]})
                 last_time = cur_time

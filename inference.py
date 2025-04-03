@@ -85,6 +85,10 @@ elif args.model == "QWen2VLStream_7B_v3_train":
     from models.QWen2VL_Stream_v3 import EvalQWen2VLStreamV3Train
     assert os.path.exists(args.model_path)
     model = EvalQWen2VLStreamV3Train(args)
+elif args.model == "QWen2VLStream_7B_v3_train":
+    from models.QWen2VL_Stream_v3 import EvalQWen2VLStreamV3Baseline
+    assert os.path.exists(args.model_path)
+    model = EvalQWen2VLStreamV3Baseline(args)
 else:
     raise ValueError(f"Unsupported model: {args.model}. Please implement the model.")
 

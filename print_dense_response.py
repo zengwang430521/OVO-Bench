@@ -10,7 +10,8 @@ import json
 
 
 # src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_2_epoch_1_32r/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
-src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_3_epoch_1/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
+# src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_3_epoch_1/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
+src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_5_epoch_1/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
 
 accept_delay = 1
 
