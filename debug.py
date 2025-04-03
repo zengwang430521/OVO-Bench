@@ -23,3 +23,4 @@ prompt = processor.apply_chat_template(messages[0]["content"], tokenize=False, a
 print(prompt)
 
 # /usr/local/lib/python3.8/dist-packages/transformers/models/qwen2_vl/modeling_qwen2_vl.py
+

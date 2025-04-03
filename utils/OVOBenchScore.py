@@ -203,7 +203,7 @@ class OVOBenchOfflineScore():
         print(' '.join([f"{results_all.get(k, -1):.2f}" for k in keys]))
 
 
-def get_realtime_response(all_responses, realtime):
+def get_realtime_response(all_responses, realtime, ignore_none=True):
     if all_responses is None:
         return None
 
@@ -271,7 +271,10 @@ class OVOBenchOnlineScore(OVOBenchOfflineScore):
         tasks = list(set([result["task"] for result in results]))
         for task in tasks:
             scores[task] = []
-            
+        scores["REC_stream_acc"] = []
+        scores["REC_stream_gt"] = []
+        scores["REC_stream_pred"] = []
+
         errors = {}
         for task in tasks:
             errors[task] = []
@@ -281,11 +284,40 @@ class OVOBenchOnlineScore(OVOBenchOfflineScore):
 
             # Calculate score for REC
             if result["task"] == "REC":
+                count_dict = {}
+                for test_info_ in result["test_info"]:
+                    count_dict[test_info_["realtime"]] = test_info_["count"]
+
+                need_response = {}
+                prev_count = 0
+                times = sorted(count_dict.keys())
+                for i, t in enumerate(times):
+                    # 检查前一个时间点
+                    cur_count = count_dict[t]
+                    need_response[t] = (cur_count != prev_count)
+                    prev_count = cur_count
+                
+                do_response = {}
+                for t, res in all_responses:
+                    do_response[t] = res is not None
+                
+                t = 0
                 for j, test_info_ in enumerate(result["test_info"]):
                     realtime = test_info_["realtime"]
                     response = get_realtime_response(all_responses, realtime)
                     scores["REC"].append(get_score_REC(response, test_info_["count"]))
-            
+
+                    gt_res_flag = need_response[realtime]
+                    pred_res_flag = do_response.get(realtime, False)
+                    
+                    if pred_res_flag == gt_res_flag:
+                        scores["REC_stream_acc"].append(1)
+                    else:
+                        scores["REC_stream_acc"].append(0)
+                    scores["REC_stream_gt"].append(gt_res_flag)
+                    scores["REC_stream_pred"].append(pred_res_flag)
+
+
             # Calculate score for SSR
             if result["task"] == "SSR":
                 if "start_time" in result.keys():
@@ -393,8 +425,9 @@ class OVOBenchOnlineScore(OVOBenchOfflineScore):
 
                 # correct_forward += sum(v)
                 # total_forward += len(v)
-                avg_scores["forward"].append(sum(v) / len(v))
-                results_all[k] = 100 * sum(v) / len(v)
+                if 'stream' not in k:
+                    avg_scores["forward"].append(sum(v) / len(v))
+                    results_all[k] = 100 * sum(v) / len(v)
 
             # print(f"Forward Avg.: {100 * correct_forward / total_forward:.2f}\n")
             print(f"Forward Avg.: {100 * sum(avg_scores['forward']) / len(avg_scores['forward']):.2f}\n")
@@ -406,8 +439,7 @@ class OVOBenchOnlineScore(OVOBenchOfflineScore):
 
         print(
             f"Total Avg.: {100 * (sum(avg_scores['backward']) + sum(avg_scores['realtime']) + sum(avg_scores['forward'])) / (len(avg_scores['backward']) + len(avg_scores['realtime']) + len(avg_scores['forward'])):.2f}")
-        results_all['Total_Avg'] = 100 * (
-                    sum(avg_scores['backward']) + sum(avg_scores['realtime']) + sum(avg_scores['forward'])) / (
+        results_all['Total_Avg'] = 100 * (sum(avg_scores['backward']) + sum(avg_scores['realtime']) + sum(avg_scores['forward'])) / (
                                                len(avg_scores['backward']) + len(avg_scores['realtime']) + len(
                                            avg_scores['forward']))
 
@@ -422,3 +454,6 @@ class OVOBenchOnlineScore(OVOBenchOfflineScore):
 
         print(' '.join(keys))
         print(' '.join([f"{results_all.get(k, -1):.2f}" for k in keys]))
+
+        if 'REC_stream_acc' in results_all.keys():
+            print(f"REC_stream_acc:{results_all['REC_stream_acc']}")

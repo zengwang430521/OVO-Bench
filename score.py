@@ -18,6 +18,7 @@ args = parser.parse_args()
 assert os.path.exists(os.path.join(args.result_dir, args.model))
 
 results_paths = os.listdir(os.path.join(args.result_dir, args.model))
+results_paths = [p for p in results_paths if p.endswith('.json')]
 results = {
     "backward": [],
     "realtime": [],
