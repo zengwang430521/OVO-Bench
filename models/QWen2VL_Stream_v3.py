@@ -1157,8 +1157,8 @@ class EvalQWen2VLStreamV3Baseline(EvalQWen2VLStreamV2):
             task=None,
     ):
 
-        import pdb; pdb.set_trace()
-        print('Debug: EvalQWen2VLStreamV3Baseline Inference')
+        # import pdb; pdb.set_trace()
+        # print('Debug: EvalQWen2VLStreamV3Baseline Inference')
 
         print(f"(Time: {query_time}) User:{prompt}")
         print(f'check times: {check_times}')
