@@ -1,21 +1,38 @@
 import json
+import matplotlib.pyplot as plt
+import matplotlib
+# 设置支持中文字体（自动使用系统中存在的字体）
+matplotlib.rcParams['font.sans-serif'] = ['AR PL UKai CN']  # 黑体
+matplotlib.rcParams['axes.unicode_minus'] = False    # 正常显示负号
+from collections import Counter
+import math
+import numpy as np
+
 
 # src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/rec_epoch_4_dense/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
 # src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/rec_epoch_4_2_dense/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
 # src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/rec_stream_epoch_4_dense/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
 # src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/rec_stream_v5_epoch_1_dense/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
 # src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/rec_stream_v5_epoch_2_dense/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
+
 # src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/rec_stream_v5_2_epoch_1_dense/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
 # src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/rec_stream_v5_2_epoch_2_dense/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
-#
-#
 # src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_2_epoch_1_32r/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
-# src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_3_epoch_1/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
-# src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_5_epoch_1/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
+# src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_2_epoch_1_lr/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
 
-src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/baseline/QWen2VL_7B_V3/QWen2VL_7B_V3_REC_online_1.json'
+src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/rec_stream_v5_2_epoch_1_dense/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
+# src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_3_epoch_1/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
+# src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_4_epoch_1/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
+src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_5_epoch_1/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
+# src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_6_epoch_1/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
+# src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_7_epoch_1/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
+
 
 accept_delay = 0
+flag_plot = False
+flag_score = True
+flag_re_count = False
+# flag_re_count = True
 
 
 tar_file = src_file.replace('.json', '.txt')
@@ -30,6 +47,8 @@ total_extra_response_in_seg = 0
 total_extra_response_out_seg = 0
 total_covered_seg = 0
 total_missed_seg = 0
+total_seg_infos = []
+total_extra_response_out_distances = []
 
 with open(tar_file, 'w', encoding='utf-8') as f_tar:
     for idx, item in enumerate(results['forward']):
@@ -117,6 +136,7 @@ with open(tar_file, 'w', encoding='utf-8') as f_tar:
         num_covered_seg = 0
         num_missed_seg = 0
 
+
         target_responses = {tuple(seg): [] for seg in target_segs}
         for t in response_times:
             in_target = False
@@ -128,7 +148,28 @@ with open(tar_file, 'w', encoding='utf-8') as f_tar:
             if not in_target:
                 num_extra_response_out_seg += 1
 
+                # 计算与所有段落的距离
+                distances = []
+                for seg in target_segs:
+                    if t < seg[0]:
+                        # 提前
+                        dist = t - seg[0]
+                    elif t > seg[1] :
+                        # 落后
+                        dist = t - seg[1]
+                    else:
+                        dist = 0  # 不应该进来这里，但加个保险
+                    distances.append(dist)
+                min_dist = min(abs(d) for d in distances)
+                closest_dists = [d for d in distances if abs(d) == min_dist]
+                total_extra_response_out_distances.extend(closest_dists)
+
         for seg, times in target_responses.items():
+            total_seg_infos.append({
+                "time": seg,
+                "res_times": times
+            })
+
             if times:
                 num_correct_response += 1
                 num_covered_seg += 1
@@ -188,26 +229,116 @@ with open(tar_file, 'w', encoding='utf-8') as f_tar:
     f_tar.write(log_text)  # 写入文件
 
 
+if flag_plot:
+    '''画直方图'''
+    # 配置：你可以在这里调整阈值
+    THRESHOLD = 20
+    histogram_file = src_file.replace('.json', 'time_offset.png')
 
-import argparse
-from utils.OVOBenchScore import OVOBenchOfflineScore, OVOBenchOnlineScore
+    # 分桶处理：<-THRESHOLD 为一组，>THRESHOLD 为一组，其余保留原始值
+    # 分桶
+    binned = []
+    for val in total_extra_response_out_distances:
+        if val < -THRESHOLD:
+            binned.append(f"<-{THRESHOLD}")
+        elif val > THRESHOLD:
+            binned.append(f">{THRESHOLD}")
+        else:
+            binned.append(str(round(val)))
 
-parser = argparse.ArgumentParser(description='Eval OVBench')
-parser.add_argument("--result_dir", type=str, default="results", help="Root directory of results")
-parser.add_argument("--model", type=str, default='None', help="Model to evaluate")
-parser.add_argument("--force_response", action="store_true")
-args = parser.parse_args()
+    # 统计频次
+    counter = Counter(binned)
 
-results = {
-    "backward": [],
-    "realtime": [],
-    "forward": []
-}
-with open(src_file, "r") as f:
-    result = json.load(f)
-    results["backward"] += result["backward"]
-    results["realtime"] += result["realtime"]
-    results["forward"] += result["forward"]
+    # 构造横坐标顺序（从 <-THRESHOLD 到 >THRESHOLD）
+    x_labels = [f"<-{THRESHOLD}"] + [str(i) for i in range(-THRESHOLD, THRESHOLD + 1)] + [f">{THRESHOLD}"]
+    y_counts = [counter.get(label, 0) for label in x_labels]
 
-score_model = OVOBenchOnlineScore(args, results)
-score_model.score()
+    # 绘图
+    plt.figure(figsize=(14, 6))
+    plt.bar(x_labels, y_counts)
+    plt.xlabel("时间差（秒）")
+    plt.ylabel("频次")
+    plt.title("错误回复距离最近段落的时间差分布（含提前与延后）")
+    plt.xticks(rotation=90)
+    plt.grid(axis='y')
+    plt.tight_layout()
+
+    # 保存
+    plt.savefig(histogram_file, dpi=800)
+    # plt.show()
+    plt.close()
+
+    print(f"直方图已保存为：{histogram_file}")
+
+
+    '''散点图'''
+    res_num_file = src_file.replace('.json', 'res_num.png')
+
+    seg_duration, res_num = [], []
+    for seg_info in total_seg_infos:
+        seg = seg_info['time']
+        res_times = seg_info['res_times']
+        seg_duration.append(seg[1]- seg[0])
+        res_num.append(len(res_times))
+
+    # 添加抖动来避免点完全重合
+    x_max = 20
+    x_ticks = np.arange(0, x_max + 1, 1)
+
+    jittered_x = np.array(seg_duration) + np.random.normal(0, 0.1, size=len(seg_duration))
+    jittered_y = np.array(res_num) + np.random.normal(0, 0.1, size=len(res_num))
+    plt.figure(figsize=(10, 6))
+    plt.scatter(jittered_x, jittered_y, alpha=0.6, s=10)
+    plt.xlim(0, x_max)
+    plt.xticks(x_ticks)
+    plt.title("response num")
+    plt.xlabel("action duration")
+    plt.ylabel("response number")
+    plt.grid(True)
+    plt.savefig(res_num_file, dpi=800)
+    # plt.show()
+
+    # plt.figure(figsize=(8, 6))
+    # plt.hist2d(seg_duration, res_num, bins=[range(min(seg_duration), max(seg_duration)+2),
+    #                                         range(min(res_num), max(res_num)+2)], cmap='Blues')
+    # plt.colorbar(label='Count')
+    # plt.xlabel("Segment Duration (s)")
+    # plt.ylabel("Response Count")
+    # plt.title("Heatmap of Segment Duration vs Response Count")
+    # plt.grid(True)
+    # plt.show()
+
+if flag_score:
+    import argparse
+    from utils.OVOBenchScore import OVOBenchOfflineScore, OVOBenchOnlineScore
+
+    parser = argparse.ArgumentParser(description='Eval OVBench')
+    parser.add_argument("--result_dir", type=str, default="results", help="Root directory of results")
+    parser.add_argument("--model", type=str, default='None', help="Model to evaluate")
+    parser.add_argument("--force_response", action="store_true")
+    args = parser.parse_args()
+
+    results = {
+        "backward": [],
+        "realtime": [],
+        "forward": []
+    }
+    with open(src_file, "r") as f:
+        result = json.load(f)
+        results["backward"] += result["backward"]
+        results["realtime"] += result["realtime"]
+        results["forward"] += result["forward"]
+
+    if flag_re_count:
+        for item in result['forward']:
+            all_responses = item['all_responses']
+            c = 0
+            for idx in range(len(all_responses)):
+                t, r = all_responses[idx]
+                if r is not None:
+                    c += 1
+                    all_responses[idx] = [t, str(c)]
+            item['all_responses'] = all_responses
+
+    score_model = OVOBenchOnlineScore(args, results)
+    score_model.score()

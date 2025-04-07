@@ -1,3 +1,5 @@
+import copy
+
 import torch
 from utils.OVOBench import OVOBenchOffline
 from transformers import AutoProcessor
@@ -38,6 +40,9 @@ def _read_video_decord_v2(
         idx_start = max(round(start_time * video_fps), idx_start)
     if end_time is not None:
         idx_end = min(round(end_time * video_fps), idx_end)
+
+    ele = copy.deepcopy(ele)
+    ele["nframes"] = min(ele["nframes"], (idx_end - idx_start + 1))
 
     nframes = smart_nframes(ele, total_frames=(idx_end - idx_start + 1), video_fps=video_fps)
     idx = torch.linspace(idx_start, idx_end, nframes).round().long().tolist()
