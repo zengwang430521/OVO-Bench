@@ -249,11 +249,12 @@ class OVOBenchOnlineScore(OVOBenchOfflineScore):
     def calculate_score_forward(self, results):
         def get_score_REC(response, gt):
             if response == None:
-                return 0
+                response = '0'        # REC 没有回复的时候应该看成0
+                # return 0
             import re
             response = re.findall(r'\d+', response)
             response = "".join(response)
-            return response == str(gt)
+            return int(response == str(gt))
 
         def get_score_SSR(response, gt):
             if response == None:

@@ -135,14 +135,17 @@ class EvalQWen2VL3(OVOBenchOffline):
                 assert not question == None
                 assert not options == None
                 prompt = self.build_prompt(task=task, question=question, options=options, _anno_=None, index=None)
-                try:
-                    # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
-                    # response = self.inference(chunk_video_path, prompt)
-                    force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime,
-                                                                   end_time=realtime + 3, only_one_response=True)
-                except Exception as e:
-                    print(f"Error during inference: {e}")
-                    force_response, all_responses = None, None
+                force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime,
+                                                               end_time=realtime + 3, only_one_response=True)
+
+                # try:
+                #     # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
+                #     # response = self.inference(chunk_video_path, prompt)
+                #     force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime,
+                #                                                    end_time=realtime + 3, only_one_response=True)
+                # except Exception as e:
+                #     print(f"Error during inference: {e}")
+                #     force_response, all_responses = None, None
 
                 result = {
                     "id": id,
@@ -168,15 +171,18 @@ class EvalQWen2VL3(OVOBenchOffline):
                 assert not question == None
                 assert not options == None
                 prompt = self.build_prompt(task=task, question=question, options=options, _anno_=None, index=None)
-                try:
-                    # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
-                    # response = self.inference(chunk_video_path, prompt)
-                    # response = self.inference(video, prompt, start_time=0, end_time=realtime)
-                    force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime,
-                                                                   end_time=realtime + 3, only_one_response=True)
-                except Exception as e:
-                    print(f"Error during inference: {e}")
-                    force_response, all_responses = None, None
+                force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime,
+                                                               end_time=realtime + 3, only_one_response=True)
+
+                # try:
+                #     # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
+                #     # response = self.inference(chunk_video_path, prompt)
+                #     # response = self.inference(video, prompt, start_time=0, end_time=realtime)
+                #     force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime,
+                #                                                    end_time=realtime + 3, only_one_response=True)
+                # except Exception as e:
+                #     print(f"Error during inference: {e}")
+                #     force_response, all_responses = None, None
 
                 result = {
                     "id": id,
@@ -210,22 +216,34 @@ class EvalQWen2VL3(OVOBenchOffline):
                 elif "start_time" in _anno_.keys():
                     query_time = min(max(_anno_["start_time"][0] - 1, 0), query_time)
 
-
                 prompt = self.build_prompt(task=task, question=None, options=None, _anno_=_anno_, index=None)
-                try:
-                    # 为了测试得快一点，只在几个时间点进行测试
-                    # crr 只需要回复一次就可以了
-                    force_response, all_responses = self.inference(
-                        video,
-                        prompt,
-                        start_time=0,
-                        query_time=query_time,
-                        end_time=end_time,
-                        only_one_response=(task == 'CRR'),
-                        check_times=None if DENSE_TEST else test_times,
-                        task=task)
-                except:
-                    force_response, all_responses = None, None
+
+                # 为了测试得快一点，只在几个时间点进行测试
+                # crr 只需要回复一次就可以了
+                force_response, all_responses = self.inference(
+                    video,
+                    prompt,
+                    start_time=0,
+                    query_time=query_time,
+                    end_time=end_time,
+                    only_one_response=(task == 'CRR'),
+                    check_times=None if DENSE_TEST else test_times,
+                    task=task)
+
+                # try:
+                #     # 为了测试得快一点，只在几个时间点进行测试
+                #     # crr 只需要回复一次就可以了
+                #     force_response, all_responses = self.inference(
+                #         video,
+                #         prompt,
+                #         start_time=0,
+                #         query_time=query_time,
+                #         end_time=end_time,
+                #         only_one_response=(task == 'CRR'),
+                #         check_times=None if DENSE_TEST else test_times,
+                #         task=task)
+                # except:
+                #     force_response, all_responses = None, None
 
 
                 _anno_["force_response"] = force_response
@@ -367,16 +385,22 @@ class EvalQWen2VL3(OVOBenchOffline):
         force_response = None
         # 先在 query time 强制回答一次
         if query_time > 0:
-            force_response = get_response()
+            response = get_response()
             if task == 'CRR':
-                flag = 'no' not in force_response.lower()
+                flag = 'no' not in response.lower()
             else:
                 flag = True
+
             if flag:
-                all_responses.append((cur_time, force_response))
-                print(f"(Time: {cur_time}) Assistant:{force_response}")
+                all_responses.append((cur_time, response))
+                print(f"(Time: {cur_time}) Assistant:{response}")
             else:
+                if not only_one_response:
+                    # only_one_response 模式下，加入None会让推理提前停止
+                    all_responses.append((cur_time, None))
                 print(f"(Time: {cur_time}) None")
+            force_response = response
+
 
         # stream 循环处理
         if check_times is None:
@@ -396,7 +420,7 @@ class EvalQWen2VL3(OVOBenchOffline):
 
             response = get_response()
             if task == 'CRR':
-                flag = 'no' not in force_response.lower()
+                flag = 'no' not in response.lower()
             else:
                 flag = True
 

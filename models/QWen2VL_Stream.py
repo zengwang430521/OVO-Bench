@@ -227,13 +227,16 @@ class EvalQWen2VLStream(OVOBenchOffline):
                 assert not question == None
                 assert not options == None
                 prompt = self.build_prompt(task=task, question=question, options=options, _anno_=None, index=None)
-                try:
-                    # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
-                    # response = self.inference(chunk_video_path, prompt)
-                    force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime, end_time=realtime+3, only_one_response=True)
-                except Exception as e:
-                    print(f"Error during inference: {e}")
-                    force_response, all_responses = None, None
+                force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime,
+                                                               end_time=realtime + 3, only_one_response=True)
+
+                # try:
+                #     # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
+                #     # response = self.inference(chunk_video_path, prompt)
+                #     force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime, end_time=realtime+3, only_one_response=True)
+                # except Exception as e:
+                #     print(f"Error during inference: {e}")
+                #     force_response, all_responses = None, None
 
                 result = {
                     "id": id,
@@ -259,14 +262,18 @@ class EvalQWen2VLStream(OVOBenchOffline):
                 assert not question == None
                 assert not options == None
                 prompt = self.build_prompt(task=task, question=question, options=options, _anno_=None, index=None)
-                try:
-                    # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
-                    # response = self.inference(chunk_video_path, prompt)
-                    # response = self.inference(video, prompt, start_time=0, end_time=realtime)
-                    force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime, end_time=realtime+3, only_one_response=True)
-                except Exception as e:
-                    print(f"Error during inference: {e}")
-                    force_response, all_responses = None, None
+                force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime,
+                                                               end_time=realtime + 3, only_one_response=True)
+
+                # try:
+                #     # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
+                #     # response = self.inference(chunk_video_path, prompt)
+                #     # response = self.inference(video, prompt, start_time=0, end_time=realtime)
+                #     force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=realtime, end_time=realtime+3, only_one_response=True)
+                # except Exception as e:
+                #     print(f"Error during inference: {e}")
+                #     force_response, all_responses = None, None
+
 
 
                 result = {
@@ -300,10 +307,14 @@ class EvalQWen2VLStream(OVOBenchOffline):
                     query_time = max(_anno_["start_time"][0] - 1, 0)
 
                 prompt = self.build_prompt(task=task, question=None, options=None, _anno_=_anno_, index=None)
-                try:
-                    force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=query_time, end_time=end_time, only_one_response=False)
-                except:
-                    force_response, all_responses = None, None
+                force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=query_time,
+                                                               end_time=end_time, only_one_response=False)
+
+                # try:
+                #     force_response, all_responses = self.inference(video, prompt, start_time=0, query_time=query_time, end_time=end_time, only_one_response=False)
+                # except:
+                #     force_response, all_responses = None, None
+
 
                 _anno_["force_response"] = force_response
                 _anno_["all_responses"] = all_responses

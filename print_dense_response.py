@@ -7,13 +7,15 @@ import json
 # src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/rec_stream_v5_epoch_2_dense/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
 # src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/rec_stream_v5_2_epoch_1_dense/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
 # src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/rec_stream_v5_2_epoch_2_dense/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
-
-
+#
+#
 # src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_2_epoch_1_32r/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
 # src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_3_epoch_1/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
-src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_5_epoch_1/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
+# src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/rec_stream_v5_5_epoch_1/QWen2VLStream_7B_v3_align/QWen2VLStream_7B_v3_align_REC_online_1.json'
 
-accept_delay = 1
+src_file = '/home/SENSETIME/zengwang/myprojects/task_define_service/OVO-Bench/results/dense/baseline/QWen2VL_7B_V3/QWen2VL_7B_V3_REC_online_1.json'
+
+accept_delay = 0
 
 
 tar_file = src_file.replace('.json', '.txt')
@@ -185,3 +187,27 @@ with open(tar_file, 'w', encoding='utf-8') as f_tar:
     print(log_text)  # 打印到控制台
     f_tar.write(log_text)  # 写入文件
 
+
+
+import argparse
+from utils.OVOBenchScore import OVOBenchOfflineScore, OVOBenchOnlineScore
+
+parser = argparse.ArgumentParser(description='Eval OVBench')
+parser.add_argument("--result_dir", type=str, default="results", help="Root directory of results")
+parser.add_argument("--model", type=str, default='None', help="Model to evaluate")
+parser.add_argument("--force_response", action="store_true")
+args = parser.parse_args()
+
+results = {
+    "backward": [],
+    "realtime": [],
+    "forward": []
+}
+with open(src_file, "r") as f:
+    result = json.load(f)
+    results["backward"] += result["backward"]
+    results["realtime"] += result["realtime"]
+    results["forward"] += result["forward"]
+
+score_model = OVOBenchOnlineScore(args, results)
+score_model.score()

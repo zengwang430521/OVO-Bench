@@ -1003,15 +1003,19 @@ class EvalQWen2VLStreamV3Baseline(EvalQWen2VLStreamV2):
                 assert not question == None
                 assert not options == None
                 prompt = self.build_prompt(task=task, question=question, options=options, _anno_=None, index=None)
-                try:
-                    # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
-                    # response = self.inference(chunk_video_path, prompt)
-                    force_response, all_responses = self.inference(
-                        video, prompt, start_time=0, query_time=realtime,
-                        end_time=realtime + 3, only_one_response=True, task=task)
-                except Exception as e:
-                    print(f"Error during inference: {e}")
-                    force_response, all_responses = None, None
+                force_response, all_responses = self.inference(
+                    video, prompt, start_time=0, query_time=realtime,
+                    end_time=realtime + 3, only_one_response=True, task=task)
+
+                # try:
+                #     # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
+                #     # response = self.inference(chunk_video_path, prompt)
+                #     force_response, all_responses = self.inference(
+                #         video, prompt, start_time=0, query_time=realtime,
+                #         end_time=realtime + 3, only_one_response=True, task=task)
+                # except Exception as e:
+                #     print(f"Error during inference: {e}")
+                #     force_response, all_responses = None, None
 
                 result = {
                     "id": id,
@@ -1037,16 +1041,21 @@ class EvalQWen2VLStreamV3Baseline(EvalQWen2VLStreamV2):
                 assert not question == None
                 assert not options == None
                 prompt = self.build_prompt(task=task, question=question, options=options, _anno_=None, index=None)
-                try:
-                    # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
-                    # response = self.inference(chunk_video_path, prompt)
-                    # response = self.inference(video, prompt, start_time=0, end_time=realtime)
-                    force_response, all_responses = self.inference(
-                        video, prompt, start_time=0, query_time=realtime,
-                        end_time=realtime + 3, only_one_response=True, task=task)
-                except Exception as e:
-                    print(f"Error during inference: {e}")
-                    force_response, all_responses = None, None
+                force_response, all_responses = self.inference(
+                    video, prompt, start_time=0, query_time=realtime,
+                    end_time=realtime + 3, only_one_response=True, task=task)
+
+                # try:
+                #     # chunk_video_path = self.chunk_video(video_path=video, end_time=realtime)
+                #     # response = self.inference(chunk_video_path, prompt)
+                #     # response = self.inference(video, prompt, start_time=0, end_time=realtime)
+                #     force_response, all_responses = self.inference(
+                #         video, prompt, start_time=0, query_time=realtime,
+                #         end_time=realtime + 3, only_one_response=True, task=task)
+                # except Exception as e:
+                #     print(f"Error during inference: {e}")
+                #     force_response, all_responses = None, None
+
 
                 result = {
                     "id": id,
@@ -1082,43 +1091,42 @@ class EvalQWen2VLStreamV3Baseline(EvalQWen2VLStreamV2):
 
 
                 prompt = self.build_prompt(task=task, question=None, options=None, _anno_=_anno_, index=None)
-                try:
-                    # 为了测试得快一点，只在几个时间点进行测试
-                    if task == 'CRR':
-                        # crr 只需要回复一次就可以了
-                        force_response, all_responses = self.inference(
-                            video,
-                            prompt,
-                            start_time=0,
-                            query_time=query_time,
-                            end_time=end_time,
-                            only_one_response=True,
-                            check_times=None if DENSE_TEST else test_times,
-                            task=task
-                        )
-                    else:
-                        force_response, all_responses = self.inference(
-                            video,
-                            prompt,
-                            start_time=0,
-                            query_time=query_time,
-                            end_time=end_time,
-                            only_one_response=False,
-                            check_times=None if DENSE_TEST else test_times,
-                            task=task
-                        )
-                except:
-                    force_response, all_responses = None, None
-                    # import pdb; pdb.set_trace()
-                    # force_response, all_responses = self.inference(
-                    #     video,
-                    #     prompt,
-                    #     start_time=0,
-                    #     query_time=query_time,
-                    #     end_time=end_time,
-                    #     only_one_response=False,
-                    #     check_times=test_times
-                    # )
+                force_response, all_responses = self.inference(
+                    video,
+                    prompt,
+                    start_time=0,
+                    query_time=query_time,
+                    end_time=end_time,
+                    only_one_response=(task == 'CRR'),
+                    check_times=None if DENSE_TEST else test_times,
+                    task=task
+                )
+
+                # try:
+                #     # 为了测试得快一点，只在几个时间点进行测试
+                #     # crr 只需要回复一次就可以了
+                #     force_response, all_responses = self.inference(
+                #         video,
+                #         prompt,
+                #         start_time=0,
+                #         query_time=query_time,
+                #         end_time=end_time,
+                #         only_one_response=(task == 'CRR'),
+                #         check_times=None if DENSE_TEST else test_times,
+                #         task=task
+                #     )
+                # except:
+                #     force_response, all_responses = None, None
+                #     # import pdb; pdb.set_trace()
+                #     # force_response, all_responses = self.inference(
+                #     #     video,
+                #     #     prompt,
+                #     #     start_time=0,
+                #     #     query_time=query_time,
+                #     #     end_time=end_time,
+                #     #     only_one_response=False,
+                #     #     check_times=test_times
+                #     # )
 
                 _anno_["force_response"] = force_response
                 _anno_["all_responses"] = all_responses
